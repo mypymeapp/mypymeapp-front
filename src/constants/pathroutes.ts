@@ -10,6 +10,8 @@ export const PATHROUTES = {
     compras: '/pymes/compras',
     facturacion: '/pymes/facturacion',
     empleados: '/pymes/empleados',
+    empleados_nuevo: '/pymes/empleados/nuevo',
+    empleado_detalle: (id: string) => `/pymes/empleados/${id}`,
     inventario: '/pymes/inventario',
     proveedores: '/pymes/proveedores',
     proveedores_nuevo: '/pymes/proveedores/nuevo',
