@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Reportes', href: PATHROUTES.pymes.reportes, icon: BarChart3 },
   { label: 'Clientes', href: PATHROUTES.pymes.clientes, icon: Users },
   { label: 'Proveedores', href: PATHROUTES.pymes.proveedores, icon: Truck },
+  { label: 'Empleados', href: PATHROUTES.pymes.empleados, icon: Users },
 ];
 
 const bottomNavItems = [
