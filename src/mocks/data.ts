@@ -1,3 +1,63 @@
+
+import type { Empleado } from './types';
+
+export const mockEmpleados: Empleado[] = [
+  {
+    id: 'emp-001',
+    nombre: 'Maria',
+    apellido: 'Perez',
+    email: 'maria.perez@empresa.com',
+    telefono: '+34 600 123 456',
+    puesto: 'Administradora',
+    fechaIngreso: '2022-01-15',
+    salario: 2200,
+    activo: true,
+  },
+  {
+    id: 'emp-002',
+    nombre: 'Juan',
+    apellido: 'Garcia',
+    email: 'juan.garcia@empresa.com',
+    telefono: '+34 600 654 321',
+    puesto: 'Técnico',
+    fechaIngreso: '2021-06-10',
+    salario: 1800,
+    activo: true,
+  },
+  {
+    id: 'emp-003',
+    nombre: 'Lucia',
+    apellido: 'Martinez',
+    email: 'lucia.martinez@empresa.com',
+    telefono: '+34 600 789 123',
+    puesto: 'Vendedora',
+    fechaIngreso: '2023-03-01',
+    salario: 1600,
+    activo: true,
+  },
+  {
+    id: 'emp-004',
+    nombre: 'Carlos',
+    apellido: 'Lopez',
+    email: 'carlos.lopez@empresa.com',
+    telefono: '+34 600 321 987',
+    puesto: 'Logística',
+    fechaIngreso: '2020-11-20',
+    salario: 1700,
+    activo: false,
+  },
+  {
+    id: 'emp-005',
+    nombre: 'Ana',
+    apellido: 'Sanchez',
+    email: 'ana.sanchez@empresa.com',
+    telefono: '+34 600 456 789',
+    puesto: 'Soporte',
+    fechaIngreso: '2024-02-12',
+    salario: 1500,
+    activo: true,
+  },
+];
 import { Proveedor, FacturaProveedor, Compra, Producto } from './types';
 
 export const mockProveedores: Proveedor[] = [

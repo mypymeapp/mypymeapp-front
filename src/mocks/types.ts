@@ -1,3 +1,14 @@
+export interface Empleado {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  puesto: string;
+  fechaIngreso: string;
+  salario: number;
+  activo: boolean;
+}
 export interface Proveedor {
   id: string;
   nombre: string;
