@@ -7,11 +7,13 @@ import { PlusCircle, Search, UserCheck, UserX, LayoutGrid, List, Mail, Phone, Us
 type ViewMode = 'cards' | 'list';
 import Link from "next/link";
 import { mockEmpleados } from "@/mocks/data";
+import { useRouter } from "next/navigation";
 
 const puestos = Array.from(new Set(mockEmpleados.map(e => e.puesto)));
 
 
 function EmpleadosPage() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroActivo, setFiltroActivo] = useState<"all" | "activos" | "inactivos">("all");
   const [filtroPuesto, setFiltroPuesto] = useState<string>("all");
@@ -95,7 +97,7 @@ function EmpleadosPage() {
       {viewMode === 'cards' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {empleadosFiltrados.map(e => (
-            <Card key={e.id} className="flex flex-col">
+            <Card key={e.id} className="flex flex-col cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => router.push(`/pymes/empleados/${e.id}`)}>
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 p-3 rounded-full flex items-center justify-center w-12 h-12">
