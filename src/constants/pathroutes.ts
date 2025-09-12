@@ -4,12 +4,18 @@ export const PATHROUTES = {
   register: '/register',
   contacto: '/contacto',
 
+  onboarding: {
+    create_company: '/onboarding/create-company',
+  },
+
   pymes: {
     dashboard: '/pymes',
     ventas: '/pymes/ventas',
     compras: '/pymes/compras',
     facturacion: '/pymes/facturacion',
     inventario: '/pymes/inventario',
+    inventario_nuevo: '/pymes/inventario/nuevo',
+    inventario_editar: (id: string) => `/pymes/inventario/${id}/editar`,
     proveedores: '/pymes/proveedores',
     proveedores_nuevo: '/pymes/proveedores/nuevo',
     proveedor_detalle: (id: string) => `/pymes/proveedores/${id}`,

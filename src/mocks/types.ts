@@ -42,3 +42,20 @@ export interface Compra {
     estadoEntrega: 'En camino' | 'Recibido' | 'Pendiente';
     estadoPago: 'Pagada' | 'Pendiente' | 'Vencida';
 }
+
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  sku: string;
+  barcode?: string;
+  description?: string;
+  price: number;
+  cost?: number;
+  category?: Category;
+   qty?: number;
+}
