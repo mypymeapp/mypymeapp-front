@@ -1,21 +1,24 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 
-interface User {
-    id: string;
-    email: string;
-    nombreEmpresa: string;
-    logoUrl: string | null;
+interface AppUser {
+    id?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    companyName?: string | null;
+    role?: string;
+    logoUrl?: string | null;
 }
 
 interface AuthContextType {
-    user: User | null;
+    user: AppUser | null;
     isAuthenticated: boolean;
+    isCompanyConfigured: boolean;
     isPremium: boolean;
-    login: (userData: User) => void;
     logout: () => void;
-    updateUserLogo: (logoUrl: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,37 +28,31 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const mockUser: User = { 
-      id: 'user-123', 
-      email: 'usuario@premium.com', 
-      nombreEmpresa: 'TecnoComponentes S.L.',
-      logoUrl: null 
-    };
+    const { data: session, status } = useSession();
+    const [appUser, setAppUser] = useState<AppUser | null>(null);
 
-    const [user, setUser] = useState<User | null>(mockUser);
-    const [isPremium, setIsPremium] = useState<boolean>(true);
+    useEffect(() => {
+        if (status === 'authenticated' && session?.user) {
+            setAppUser(session.user);
+        } else {
+            setAppUser(null);
+        }
+    }, [session, status]);
 
-    const login = (userData: User) => {
-        setUser(userData);
-    };
+    const isAuthenticated = status === 'authenticated';
+    const isCompanyConfigured = !!appUser?.companyName;
+    const isPremium = isAuthenticated;
 
     const logout = () => {
-        setUser(null);
-    };
-
-    const updateUserLogo = (logoUrl: string) => {
-        if (user) {
-            setUser({ ...user, logoUrl });
-        }
+        signOut({ callbackUrl: '/' });
     };
 
     const value = {
-        user,
-        isAuthenticated: !!user,
+        user: appUser,
+        isAuthenticated,
+        isCompanyConfigured,
         isPremium,
-        login,
         logout,
-        updateUserLogo,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -64,7 +61,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+        throw new Error('useAuth must be used within an AuthProvider');
     }
     return context;
 };
