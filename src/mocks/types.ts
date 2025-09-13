@@ -1,25 +1,32 @@
 export interface Proveedor {
   id: string;
-  nombre: string;
-  cif: string;
-  telefono: string;
-  email: string;
-  nombreContacto: string;
-  direccion: string;
-  lat: number;
-  lng: number;
-  moneda: 'ARS' | 'CLP' | 'USD' | 'EUR';
-  debeDinero: boolean;
-  mercaderiaPendiente: boolean;
+  name: string;
+  email?: string;
+  phone?: string;
+  contactName?: string;
+  address?: string;
+  country?: string;
+  cif?: string;
+  moneda?: 'ARS' | 'CLP' | 'USD' | 'EUR';
+  debeDinero?: boolean;
+  mercaderiaPendiente?: boolean;
 }
 
-export interface Producto {
+export interface Category {
   id: string;
-  proveedorId: string;
-  nombre: string;
-  descripcion: string;
-  costo: number;
-  margenUtilidad: number; 
+  name: string;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  sku: string;
+  barcode?: string;
+  description?: string;
+  price: number;
+  cost?: number;
+  category?: Category;
+  qty?: number;
 }
 
 export interface FacturaProveedor {
@@ -41,21 +48,4 @@ export interface Compra {
     monto: number;
     estadoEntrega: 'En camino' | 'Recibido' | 'Pendiente';
     estadoPago: 'Pagada' | 'Pendiente' | 'Vencida';
-}
-
-export interface Category {
-  id: string;
-  name: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  barcode?: string;
-  description?: string;
-  price: number;
-  cost?: number;
-  category?: Category;
-   qty?: number;
 }

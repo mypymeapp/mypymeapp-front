@@ -26,7 +26,7 @@ export default function AiAdvisorPage() {
                         <p className="mt-4 text-lg text-foreground/70">La Inteligencia Artificial de Gemini, integrada en tu flujo de trabajo.</p>
                     </div>
                     <PremiumCard>
-                        {/* --- LA CORRECCIÓN ESTÁ EN ESTE PÁRRAFO --- */}
+                        
                         <p className="text-lg text-foreground/80 leading-relaxed">
                             Imagina poder preguntar ¿Cuál fue mi producto más vendido en el último trimestre? o Proyecta mis ventas para los próximos 6 meses si la tendencia actual continúa y recibir una respuesta clara y concisa en segundos. 
                             Nuestra integración con la IA te permite conversar con tus datos. Identifica patrones, descubre oportunidades de venta cruzada y toma decisiones basadas en análisis profundos, todo sin escribir una sola fórmula.

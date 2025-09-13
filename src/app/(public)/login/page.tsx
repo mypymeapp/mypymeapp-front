@@ -38,16 +38,19 @@ export default function LoginPage() {
       try {
         const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
           method: 'POST',
-          body: JSON.stringify(values),
+          body: JSON.stringify({
+              email: values.email,
+              password: values.password
+          }),
           headers: { "Content-Type": "application/json" }
         });
 
-        if (!loginRes.ok) throw new Error("Las credenciales son incorrectas.");
-        
+        if (!loginRes.ok) {
+            throw new Error("Las credenciales son incorrectas.");
+        }
+
         const data = await loginRes.json();
         
-        const isCompanyConfigured = data.user.company && Object.keys(data.user.company).length > 0;
-
         const userToSignIn = {
             id: data.user.id,
             name: data.user.name,
@@ -55,7 +58,7 @@ export default function LoginPage() {
             accessToken: data.token,
             companyId: data.user.company?.id || null,
             companyName: data.user.company?.name || null,
-            role: data.user.role || 'PROPIETARIO',
+            role: data.user.role,
         };
 
         const result = await signIn('credentials', {
@@ -63,11 +66,13 @@ export default function LoginPage() {
             user: JSON.stringify(userToSignIn),
         });
         
-        if (!result?.ok) throw new Error("Hubo un problema al crear la sesión local.");
+        if (!result?.ok) {
+            throw new Error("Hubo un problema al crear la sesión local.");
+        }
         
         toast.success('¡Bienvenido de vuelta!');
 
-        if (isCompanyConfigured) {
+        if (userToSignIn.companyName) {
             router.push(PATHROUTES.pymes.dashboard);
         } else {
             router.push(PATHROUTES.onboarding.create_company);
@@ -87,11 +92,25 @@ export default function LoginPage() {
       <main className="flex items-center justify-center min-h-screen pt-16">
         <div className="w-full max-w-md p-8 space-y-6 bg-card border border-border rounded-2xl">
           <div className="text-center flex flex-col items-center">
-            <Image src={isDarkMode ? '/logo-dark.png' : '/logo-light.png'} alt="My PYME App Logo" width={200} height={50} className="object-contain mb-4" priority />
+            <Image
+              src={isDarkMode ? '/logo-dark.png' : '/logo-light.png'}
+              alt="My PYME App Logo" width={200} height={50}
+              className="object-contain mb-4" priority
+            />
             <p className="text-foreground/70">Gestiona tu negocio del futuro, hoy.</p>
           </div>
-          <a href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google/login`}><Button variant="outline" className="w-full"><FcGoogle className="mr-2 h-5 w-5" />Continuar con Google</Button></a>
-          <div className="flex items-center"><hr className="flex-grow border-border" /><span className="mx-4 text-foreground/50 text-sm">O</span><hr className="flex-grow border-border" /></div>
+          
+          <Button variant="outline" className="w-full" onClick={() => signIn('google', { callbackUrl: PATHROUTES.pymes.dashboard })}>
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continuar con Google
+          </Button>
+
+          <div className="flex items-center">
+            <hr className="flex-grow border-border" />
+            <span className="mx-4 text-foreground/50 text-sm">O</span>
+            <hr className="flex-grow border-border" />
+          </div>
+
           <form onSubmit={formik.handleSubmit} className="space-y-4">
             <div>
               <Input id="email" label="Correo Electrónico" type="email" {...formik.getFieldProps('email')} />
@@ -101,9 +120,17 @@ export default function LoginPage() {
               <Input id="password" label="Contraseña" type="password" {...formik.getFieldProps('password')} />
               {formik.touched.password && formik.errors.password ? <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div> : null}
             </div>
-            <Button type="submit" disabled={formik.isSubmitting} className="w-full">{formik.isSubmitting ? 'Iniciando sesión...' : 'Acceder con Email'}</Button>
+            <Button type="submit" disabled={formik.isSubmitting} className="w-full">
+               {formik.isSubmitting ? 'Iniciando sesión...' : 'Acceder con Email'}
+            </Button>
           </form>
-          <p className="text-center text-sm text-foreground/60">¿No tienes una cuenta?{' '}<Link href={PATHROUTES.register} className="font-medium text-primary hover:underline">Regístrate aquí</Link></p>
+
+          <p className="text-center text-sm text-foreground/60">
+            ¿No tienes una cuenta?{' '}
+            <Link href={PATHROUTES.register} className="font-medium text-primary hover:underline">
+              Regístrate aquí
+            </Link>
+          </p>
         </div>
       </main>
       <Footer />
