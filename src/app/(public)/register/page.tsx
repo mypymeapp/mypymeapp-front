@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import { signIn } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -69,12 +70,10 @@ export default function RegisterPage() {
             <p className="mt-2 text-foreground/70">Paso 1: Tus datos de acceso.</p>
           </div>
           
-          <a href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google/login`}>
-            <Button variant="outline" className="w-full">
-              <FcGoogle className="mr-2 h-5 w-5" />
-              Continuar con Google
-            </Button>
-          </a>
+          <Button variant="outline" className="w-full" onClick={() => signIn('google', { callbackUrl: PATHROUTES.pymes.dashboard })}>
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continuar con Google
+          </Button>
 
           <div className="flex items-center"><hr className="flex-grow border-border" /><span className="mx-4 text-foreground/50 text-sm">O</span><hr className="flex-grow border-border" /></div>
 

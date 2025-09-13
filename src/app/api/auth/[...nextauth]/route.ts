@@ -3,13 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import { User } from "next-auth"
 
-interface NextAuthUser extends User {
-  accessToken: string;
-  companyName: string | null;
-  companyId: string | null;
-  role: string;
-}
-
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -38,19 +31,49 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
 
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === 'google') {
+        try {
+          
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: user.name,
+              email: user.email,
+              avatarUrl: user.image,
+            }),
+          });
+          
+          if (!res.ok) return false;
+
+          const backendData = await res.json();
+          
+          user.accessToken = backendData.token;
+          user.id = backendData.user.id;
+          user.role = backendData.user.role;
+          user.company = backendData.user.company;
+          
+          return true;
+        } catch (error) {
+          console.error("Error en signIn de Google:", error);
+          return false;
+        }
+      }
+      return true;
+    },
+
     async jwt({ token, user }) {
-      const typedUser = user as NextAuthUser;
-      if (typedUser) {
-        token.id = typedUser.id;
-        token.name = typedUser.name;
-        token.email = typedUser.email;
-        token.accessToken = typedUser.accessToken;
-        token.companyId = typedUser.companyId;
-        token.companyName = typedUser.companyName;
-        token.role = typedUser.role;
+      if (user) {
+        token.id = user.id;
+        token.accessToken = user.accessToken;
+        token.companyId = user.company?.id || user.companyId || null;
+        token.companyName = user.company?.name || user.companyName || null;
+        token.role = user.role;
       }
       return token;
     },
+
     async session({ session, token }) {
       if (token && session.user) { 
         session.user.id = token.id;
@@ -63,7 +86,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
 
-  pages: { signIn: '/login' },
+  pages: { signIn: '/login', error: '/login' },
   secret: process.env.NEXTAUTH_SECRET,
 }
 

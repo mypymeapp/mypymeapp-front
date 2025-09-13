@@ -15,7 +15,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           className="absolute -inset-0.5 bg-gradient-to-r from-primary to-foreground rounded-lg blur opacity-0 group-focus-within:opacity-100 transition duration-300"
           aria-hidden="true"
         />
-        <div className="relative h-[49px]"> {/* <-- ALTURA FIJA */}
+        <div className="relative h-[49px]">
           <input
             id={id}
             ref={ref}

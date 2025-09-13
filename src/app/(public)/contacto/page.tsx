@@ -35,7 +35,7 @@ export default function ContactoPage() {
                 <Button type="submit" className="w-full">Enviar Mensaje</Button>
             </form>
 
-             {/* Simulación de botón Premium */}
+             
             <div className="mt-8 text-center p-6 border-2 border-dashed border-primary/50 rounded-lg">
                 <h3 className="font-bold text-primary">¿Eres usuario Premium?</h3>
                 <p className="text-foreground/70 mt-2">Accede a nuestro soporte prioritario por WhatsApp.</p>
@@ -43,7 +43,7 @@ export default function ContactoPage() {
                     Contactar por WhatsApp
                     <span className="text-xs ml-2">(Próximamente)</span>
                 </Button>
-                 {/* Explicación para el equipo: Este botón se volverá funcional y visible solo si `useAuth().isPremium` es true. */}
+                 
             </div>
         </div>
       </main>
