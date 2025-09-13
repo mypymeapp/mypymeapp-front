@@ -80,7 +80,7 @@ export default function PerfilPage() {
 
                 toast.success('¡Datos de la empresa guardados con éxito!');
             } catch (error) {
-                toast.error(error.message);
+                 toast.error(error instanceof Error ? error.message : 'Ocurrió un error desconocido.');
             } finally {
                 setSubmitting(false);
             }
