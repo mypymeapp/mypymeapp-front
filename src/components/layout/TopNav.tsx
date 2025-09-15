@@ -2,21 +2,33 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import Image from 'next/image';
-import { LogOut, User, ChevronDown } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import { ThemeToggleButton } from '../ui/ThemeToggleButton';
 import { PATHROUTES } from '@/constants/pathroutes';
 
-export const TopNav = () => {
+interface TopNavProps {
+  onMenuToggle: () => void;
+}
+
+export const TopNav = ({ onMenuToggle }: TopNavProps) => {
   const { data: session } = useSession();
 
   return (
-    <header className="bg-card border-b border-border p-4 flex justify-end items-center">
+    <header className="bg-card border-b border-border p-4 flex justify-between lg:justify-end items-center sticky top-0 z-20">
+      <button
+        className="p-2 lg:hidden"
+        onClick={onMenuToggle}
+        aria-label="Abrir menú de navegación"
+      >
+        <Menu className="w-6 h-6 text-foreground" />
+      </button>
+
       <div className="flex items-center gap-4">
         <ThemeToggleButton />
         <div className="h-8 w-px bg-border" />
         <div className="flex items-center gap-3">
           <Image
-            src={session?.user?.image || '/default-avatar.png'} // Necesitarás un avatar por defecto en public/
+            src={session?.user?.image || '/default-avatar.png'}
             alt={session?.user?.name || 'Avatar'}
             width={36}
             height={36}
