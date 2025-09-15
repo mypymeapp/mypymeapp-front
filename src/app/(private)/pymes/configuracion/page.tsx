@@ -1,47 +1,147 @@
 'use client';
 
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { Card } from "@/components/ui/Card";
-import Link from "next/link";
-import { PATHROUTES } from "@/constants/pathroutes";
-import { Paintbrush, User, ShieldCheck } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { ArrowLeft, Upload, User, Building, Loader2, Save } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import Link from 'next/link';
+import { PATHROUTES } from '@/constants/pathroutes';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
+import { useRef, useState, useEffect } from 'react';
 
-export default function ConfiguracionPage() {
-    const { isPremium } = useAuth();
+export default function PerfilPage() {
+    const { data: session, update } = useSession();
+    const [userData, setUserData] = useState({ name: '', avatarUrl: '' });
+    const [companyData, setCompanyData] = useState({ name: '', logoUrl: '' });
+    const [loading, setLoading] = useState(true);
+    
+    const userAvatarRef = useRef<HTMLInputElement>(null);
+    const companyLogoRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+      if (session?.user) {
+        setUserData({ name: session.user.name || '', avatarUrl: session.user.image || '' });
+        setCompanyData({ name: session.user.companyName || '', logoUrl: '' });
+        setLoading(false);
+      }
+    }, [session]);
+
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file || !session?.user?.id || !session.accessToken) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      toast.loading('Subiendo avatar...');
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/${session.user.id}/avatar`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${session.accessToken}` },
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error('Error al subir el avatar.');
+        
+        const { avatarUrl } = await res.json();
+        setUserData(prev => ({ ...prev, avatarUrl }));
+        await update({ user: { ...session.user, image: avatarUrl } });
+        toast.dismiss();
+        toast.success('¡Avatar actualizado!');
+      } catch (error) {
+        toast.dismiss();
+        toast.error(error instanceof Error ? error.message : 'Error desconocido.');
+      }
+    };
+
+    const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file || !session?.user?.companyId || !session.accessToken) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      toast.loading('Subiendo logo...');
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/companies/${session.user.companyId}/logo`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${session.accessToken}` },
+          body: formData,
+        });
+
+        if (!res.ok) throw new Error('Error al subir el logo.');
+        
+        const { logoUrl } = await res.json();
+        setCompanyData(prev => ({ ...prev, logoUrl }));
+        toast.dismiss();
+        toast.success('¡Logo actualizado!');
+      } catch (error) {
+        toast.dismiss();
+        toast.error(error instanceof Error ? error.message : 'Error desconocido.');
+      }
+    };
+    
+    if (loading) {
+        return <div className="flex justify-center items-center p-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+    }
 
     return (
-        <div className="p-4 md:p-8">
-            <h1 className="text-3xl font-bold text-foreground mb-8">Configuración</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <Link href={PATHROUTES.pymes.configuracion_perfil} className="flex">
-                    <Card className="w-full">
-                        <User className="w-8 h-8 text-primary mb-4" />
-                        <h2 className="text-xl font-bold">Perfil y Logo</h2>
-                        <p className="text-foreground/70 mt-2">Edita los datos de tu empresa y gestiona tu marca.</p>
-                    </Card>
-                </Link>
-
-                <Link href={isPremium ? PATHROUTES.pymes.configuracion_personalizacion : '#'} className="flex">
-                    <div className={`w-full relative ${!isPremium ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                        <Card className="h-full">
-                            <Paintbrush className="w-8 h-8 text-primary mb-4" />
-                            <h2 className="text-xl font-bold">Personalización de Colores</h2>
-                            <p className="text-foreground/70 mt-2">Ajusta la paleta de colores de la app a tu identidad corporativa.</p>
-                            {!isPremium && <span className="absolute top-4 right-4 text-xs font-bold bg-premium text-black px-2 py-1 rounded-full">PREMIUM</span>}
-                        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <Card isClickable={false} className="lg:col-span-1">
+                <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2"><User /> Tu Perfil</h2>
+                <div className="flex flex-col items-center text-center">
+                    <div className="relative w-32 h-32 mb-4 group">
+                        <Image
+                            src={userData.avatarUrl || '/default-avatar.png'}
+                            alt="Avatar de usuario"
+                            width={128}
+                            height={128}
+                            className="rounded-full object-cover"
+                        />
+                        <button
+                            onClick={() => userAvatarRef.current?.click()}
+                            className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <Upload className="w-6 h-6" />
+                        </button>
+                        <input type="file" ref={userAvatarRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
                     </div>
-                </Link>
-                
-                <div className={`relative flex ${!isPremium ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                     <Card className="w-full">
-                        <ShieldCheck className="w-8 h-8 text-primary mb-4" />
-                        <h2 className="text-xl font-bold">Roles y Permisos</h2>
-                        <p className="text-foreground/70 mt-2">Gestiona qué pueden ver y hacer los diferentes miembros de tu equipo.</p>
-                        {!isPremium && <span className="absolute top-4 right-4 text-xs font-bold bg-premium text-black px-2 py-1 rounded-full">PREMIUM</span>}
-                    </Card>
+                    <Input id="userName" label="Nombre Completo" defaultValue={userData.name} className="text-center" />
+                    <p className="text-sm text-foreground/60 mt-2">{session?.user?.email}</p>
                 </div>
-            </div>
+                <div className="mt-6 flex justify-end">
+                    <Button><Save className="mr-2 h-4 w-4" /> Guardar Cambios</Button>
+                </div>
+            </Card>
+
+            <Card isClickable={false} className="lg:col-span-2">
+                 <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2"><Building /> Datos de la Empresa</h2>
+                 <div className="flex flex-col items-center text-center">
+                     <div className="relative w-48 h-24 mb-4 group">
+                        <Image
+                            src={companyData.logoUrl || '/default-logo-placeholder.png'}
+                            alt="Logo de la empresa"
+                            layout="fill"
+                            className="object-contain"
+                        />
+                        <button
+                            onClick={() => companyLogoRef.current?.click()}
+                            className="absolute inset-0 bg-black/50 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                            <Upload className="w-6 h-6" />
+                        </button>
+                        <input type="file" ref={companyLogoRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
+                    </div>
+                     <Input id="companyName" label="Nombre de la Empresa" defaultValue={companyData.name} className="text-center" />
+                </div>
+                <div className="mt-6 flex justify-end">
+                    <Button><Save className="mr-2 h-4 w-4" /> Guardar Cambios</Button>
+                </div>
+            </Card>
         </div>
-    )
+    );
 }

@@ -161,7 +161,7 @@ export default function InventarioPage() {
         ) : (
             <>
                 {viewMode === 'cards' ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {products.map(product => (
                       <Card key={product.id} className="flex flex-col">
                         <div className="flex-grow">
@@ -176,11 +176,11 @@ export default function InventarioPage() {
                             <p className="text-xs text-foreground/60">Stock Actual</p>
                           </div>
                         </div>
-                        <div className="flex gap-2 mt-4">
-                          <Link href={PATHROUTES.pymes.inventario_editar(product.id)} className="w-full">
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          <Link href={PATHROUTES.pymes.inventario_editar(product.id)} className="w-full flex-grow">
                             <Button variant="outline" className="w-full"><Edit className="mr-2 h-4 w-4"/> Editar</Button>
                           </Link>
-                          <Button variant="danger" onClick={() => confirmDelete(product.id)}><Trash2 className="h-4 w-4"/></Button>
+                          <Button variant="danger" className="flex-shrink-0" onClick={() => confirmDelete(product.id)}><Trash2 className="h-4 w-4"/></Button>
                         </div>
                       </Card>
                     ))}
