@@ -9,7 +9,7 @@ import Link from "next/link";
 import { mockEmpleados } from "@/mocks/data";
 import { useRouter } from "next/navigation";
 
-const puestos = Array.from(new Set(mockEmpleados.map(e => e.puesto)));
+const puestos = Array.from(new Set(mockEmpleados.map(e => e.rol)));
 
 
 function EmpleadosPage() {
@@ -30,7 +30,7 @@ function EmpleadosPage() {
           filtroActivo === "all" ||
           (filtroActivo === "activos" && e.activo) ||
           (filtroActivo === "inactivos" && !e.activo);
-        const matchesPuesto = filtroPuesto === "all" || e.puesto === filtroPuesto;
+        const matchesPuesto = filtroPuesto === "all" || e.rol === filtroPuesto;
         return matchesSearch && matchesActivo && matchesPuesto;
       })
       .sort((a, b) => a.nombre.localeCompare(b.nombre));
@@ -105,7 +105,7 @@ function EmpleadosPage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-lg text-foreground">{e.nombre} {e.apellido}</h2>
-                    <p className="text-sm text-foreground/60">{e.puesto}</p>
+                    <p className="text-sm text-foreground/60">{e.rol}</p>
                   </div>
                 </div>
               </div>
@@ -134,7 +134,7 @@ function EmpleadosPage() {
                 <tr key={e.id} className="border-b border-border last:border-b-0 hover:bg-background">
                   <td className="p-4 font-medium">{e.nombre}</td>
                   <td className="p-4">{e.apellido}</td>
-                  <td className="p-4">{e.puesto}</td>
+                  <td className="p-4">{e.rol}</td>
                   <td className="p-4">{e.email}</td>
                   <td className="p-4 text-center">{e.activo ? <span className="text-green-500 font-bold">Sí</span> : <span className="text-red-500 font-bold">No</span>}</td>
                 </tr>

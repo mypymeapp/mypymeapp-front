@@ -20,7 +20,7 @@ export default function EmpleadoDetallePage({ params }: Props) {
 					</div>
 					<div>
 						<h2 className="font-bold text-xl text-foreground">{empleado.nombre} {empleado.apellido}</h2>
-						<p className="text-sm text-foreground/60">{empleado.puesto}</p>
+						<p className="text-sm text-foreground/60">{empleado.rol}</p>
 					</div>
 				</div>
 				<div className="space-y-2 text-foreground/80">
