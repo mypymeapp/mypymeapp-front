@@ -1,11 +1,21 @@
+'use client';
+
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { PATHROUTES } from "@/constants/pathroutes";
-import { Compass, ArrowLeft } from "lucide-react";
+import { Compass, ArrowLeft, Home, LayoutDashboard } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function NotFound() {
+  const { status } = useSession();
+  const isAuthenticated = status === 'authenticated';
+
+  const destination = isAuthenticated ? PATHROUTES.pymes.dashboard : PATHROUTES.home;
+  const buttonText = isAuthenticated ? 'Volver al Dashboard' : 'Volver a Inicio';
+  const Icon = isAuthenticated ? LayoutDashboard : Home;
+
   return (
     <div className="bg-background">
         <Navbar />
@@ -18,10 +28,10 @@ export default function NotFound() {
                     Parece que te has desviado del camino. Volvamos a un lugar seguro.
                 </p>
                 <div className="mt-10">
-                    <Link href={PATHROUTES.home}>
+                    <Link href={destination}>
                         <Button>
-                            <ArrowLeft className="mr-2 h-5 w-5" />
-                            Volver a Inicio
+                            <Icon className="mr-2 h-5 w-5" />
+                            {buttonText}
                         </Button>
                     </Link>
                 </div>
