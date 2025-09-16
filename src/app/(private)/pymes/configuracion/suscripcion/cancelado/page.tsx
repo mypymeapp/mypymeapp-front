@@ -6,7 +6,7 @@ import { PATHROUTES } from '@/constants/pathroutes';
 
 export default function CanceladoPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4">
       <Card isClickable={false} className="max-w-md text-center">
         <XCircle className="w-20 h-20 text-red-400 mx-auto mb-6" />
         <h1 className="text-3xl font-bold text-foreground">Pago Cancelado</h1>

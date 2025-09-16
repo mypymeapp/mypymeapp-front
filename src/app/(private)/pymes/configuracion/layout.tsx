@@ -2,13 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, Palette, Star } from 'lucide-react';
+import { User, Star } from 'lucide-react';
 import { PATHROUTES } from '@/constants/pathroutes';
 
 const navLinks = [
-  { href: PATHROUTES.pymes.configuracion_perfil, label: 'Perfil y Empresa', icon: User },
-  { href: PATHROUTES.pymes.configuracion_personalizacion, label: 'Personalización', icon: Palette },
   { href: PATHROUTES.pymes.suscripcion, label: 'Suscripción', icon: Star },
+  { href: PATHROUTES.pymes.configuracion_perfil, label: 'Perfil y Empresa', icon: User },
 ];
 
 export default function ConfiguracionLayout({ children }: { children: React.ReactNode }) {
