@@ -140,7 +140,7 @@ export default function NuevoClientePage() {
             }
             setSubmitting(true);
             try {
-                 // 🔹 Cambiamos la URL y los campos de la solicitud POST
+          
                  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customers`, {
                     method: 'POST',
                     headers: {

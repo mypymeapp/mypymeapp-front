@@ -132,8 +132,7 @@ import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
 import { useSession } from 'next-auth/react';
-//
-// 🔹 Importamos el nuevo tipo Customer, no el mock Cliente
+
 import { Customer } from '@/types/customer'; 
 
 import { useRouter, useParams } from 'next/navigation'; // 🟢 Importa useParams

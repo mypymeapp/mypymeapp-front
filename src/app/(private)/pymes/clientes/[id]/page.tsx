@@ -1541,7 +1541,7 @@ export default function ClienteDetalle() {
           </Button>
         </div>
 
-        {/* Sección: nota publicada (visible cuando cliente.notes existe) */}
+     
         {cliente.notes && (
           <div className="border-t border-border pt-4">
             <h3 className="font-medium flex items-center gap-2 mb-2">
