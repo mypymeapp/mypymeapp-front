@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { InputHTMLAttributes, forwardRef } from 'react';
@@ -9,19 +8,18 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, id, ...props }, ref) => {
+  ({ label, id, className, ...props }, ref) => {
     return (
       <div className="relative w-full group">
-        
         <div
           className="absolute -inset-0.5 bg-gradient-to-r from-primary to-foreground rounded-lg blur opacity-0 group-focus-within:opacity-100 transition duration-300"
           aria-hidden="true"
         />
-        <div className="relative">
+        <div className="relative h-[49px]">
           <input
             id={id}
             ref={ref}
-            className="block w-full px-4 py-3 text-foreground bg-card border border-border rounded-lg placeholder-foreground/50 focus:outline-none focus:ring-0 peer"
+            className={`block w-full h-full px-4 text-foreground bg-card border border-border rounded-lg placeholder-foreground/50 focus:outline-none focus:ring-0 peer ${className}`}
             placeholder=" "
             {...props}
           />

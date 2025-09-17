@@ -9,11 +9,15 @@ import { useState, useEffect } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { signIn } from 'next-auth/react';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
 import { FcGoogle } from 'react-icons/fc';
-import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const isDark = document.documentElement.classList.contains('dark');
@@ -24,80 +28,113 @@ export default function LoginPage() {
   }, []);
 
   const formik = useFormik({
-    initialValues: {
-      email: '',
-      password: '',
-    },
+    initialValues: { email: '', password: '' },
     validationSchema: Yup.object({
       email: Yup.string().email('Email no válido').required('El email es requerido'),
       password: Yup.string().required('La contraseña es requerida'),
     }),
-    onSubmit: values => {
-      alert(JSON.stringify(values, null, 2));
-      // Chicos acá va la lógica de login con la API
+    onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
+      try {
+        const loginRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+          method: 'POST',
+          body: JSON.stringify({
+              email: values.email,
+              password: values.password
+          }),
+          headers: { "Content-Type": "application/json" }
+        });
+
+        if (!loginRes.ok) {
+            throw new Error("Las credenciales son incorrectas.");
+        }
+
+        const data = await loginRes.json();
+        
+        const userToSignIn = {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            accessToken: data.token,
+            companyId: data.user.company?.id || null,
+            companyName: data.user.company?.name || null,
+            role: data.user.role,
+        };
+
+        const result = await signIn('credentials', {
+            redirect: false,
+            user: JSON.stringify(userToSignIn),
+        });
+        
+        if (!result?.ok) {
+            throw new Error("Hubo un problema al crear la sesión local.");
+        }
+        
+        toast.success('¡Bienvenido de vuelta!');
+
+        if (userToSignIn.companyName) {
+            router.push(PATHROUTES.pymes.dashboard);
+        } else {
+            router.push(PATHROUTES.onboarding.create_company);
+        }
+
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Error desconocido');
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-    
-      <Link 
-        href={PATHROUTES.home} 
-        className="absolute top-6 left-6 flex items-center text-foreground/70 hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Volver al Inicio
-      </Link>
-
-      <div className="w-full max-w-md p-8 space-y-6 bg-card border border-border rounded-2xl">
-        <div className="text-center flex flex-col items-center">
-          <Image
-            src={isDarkMode ? '/logo-dark.png' : '/logo-light.png'}
-            alt="My PYME App Logo"
-            width={200}
-            height={50}
-            className="object-contain mb-4"
-            priority
-          />
-          <p className="text-foreground/70">Gestiona tu negocio del futuro, hoy.</p>
-        </div>
-        
-        <Button variant="outline" className="w-full" onClick={() => signIn('google', { callbackUrl: PATHROUTES.pymes.dashboard })}>
-          <FcGoogle className="mr-2 h-5 w-5" />
-          Continuar con Google
-        </Button>
-
-        <div className="flex items-center">
-          <hr className="flex-grow border-border" />
-          <span className="mx-4 text-foreground/50 text-sm">O</span>
-          <hr className="flex-grow border-border" />
-        </div>
-
-        <form onSubmit={formik.handleSubmit} className="space-y-4">
-          <div>
-            <Input id="email" label="Correo Electrónico" type="email" {...formik.getFieldProps('email')} />
-            {formik.touched.email && formik.errors.email ? (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div>
-            ) : null}
+    <div className="bg-background">
+      <Navbar />
+      <main className="flex items-center justify-center min-h-screen pt-16">
+        <div className="w-full max-w-md p-8 space-y-6 bg-card border border-border rounded-2xl">
+          <div className="text-center flex flex-col items-center">
+            <Image
+              src={isDarkMode ? '/logo-dark.png' : '/logo-light.png'}
+              alt="My PYME App Logo" width={200} height={50}
+              className="object-contain mb-4" priority
+            />
+            <p className="text-foreground/70">Gestiona tu negocio del futuro, hoy.</p>
           </div>
-          <div>
-            <Input id="password" label="Contraseña" type="password" {...formik.getFieldProps('password')} />
-            {formik.touched.password && formik.errors.password ? (
-              <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div>
-            ) : null}
-          </div>
-          <Button type="submit" className="w-full">
-            Acceder con Email
+          
+          <Button variant="outline" className="w-full" onClick={() => signIn('google', { callbackUrl: PATHROUTES.pymes.dashboard })}>
+            <FcGoogle className="mr-2 h-5 w-5" />
+            Continuar con Google
           </Button>
-        </form>
 
-        <p className="text-center text-sm text-foreground/60">
-          ¿No tienes cuenta?{' '}
-          <Link href={PATHROUTES.register} className="font-medium text-primary hover:underline">
-            Regístrate aquí
-          </Link>
-        </p>
-      </div>
+          <div className="flex items-center">
+            <hr className="flex-grow border-border" />
+            <span className="mx-4 text-foreground/50 text-sm">O</span>
+            <hr className="flex-grow border-border" />
+          </div>
+
+          <form onSubmit={formik.handleSubmit} className="space-y-4">
+            <div>
+              <Input id="email" label="Correo Electrónico" type="email" {...formik.getFieldProps('email')} />
+              {formik.touched.email && formik.errors.email ? <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div> : null}
+            </div>
+            <div>
+              <Input id="password" label="Contraseña" type="password" {...formik.getFieldProps('password')} />
+              {formik.touched.password && formik.errors.password ? <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div> : null}
+            </div>
+            <Button type="submit" disabled={formik.isSubmitting} className="w-full">
+               {formik.isSubmitting ? 'Iniciando sesión...' : 'Acceder con Email'}
+            </Button>
+          </form>
+
+          <p className="text-center text-sm text-foreground/60">
+            ¿No tienes una cuenta?{' '}
+            <Link href={PATHROUTES.register} className="font-medium text-primary hover:underline">
+              Regístrate aquí
+            </Link>
+          </p>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }
+
