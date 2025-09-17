@@ -10,6 +10,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { signIn } from 'next-auth/react';
 import { FcGoogle } from 'react-icons/fc';
+import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -39,6 +40,15 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
+    
+      <Link 
+        href={PATHROUTES.home} 
+        className="absolute top-6 left-6 flex items-center text-foreground/70 hover:text-foreground transition-colors"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Volver al Inicio
+      </Link>
+
       <div className="w-full max-w-md p-8 space-y-6 bg-card border border-border rounded-2xl">
         <div className="text-center flex flex-col items-center">
           <Image
