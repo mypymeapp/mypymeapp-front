@@ -4,10 +4,10 @@ export interface Empleado {
   apellido: string;
   email: string;
   telefono: string;
-  rol: string; // dueño de empresa: mira todo / control mercaderia: inventario / administracion: compras, facturacion, proveedores, empleados / vendedor: ventas y clientes 
+  rol: string; 
   fechaIngreso: string;
   salario: number;
-  activo: boolean; // justificacion de inactividad // si esta inactivo no puede loguearse
+  activo: boolean; 
 }
 export interface Proveedor {
   id: string;
