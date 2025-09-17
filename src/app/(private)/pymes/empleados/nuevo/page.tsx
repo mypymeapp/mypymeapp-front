@@ -11,12 +11,10 @@ import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
 
 const puestos = [
-  'Administradora',
-  'Tecnico',
-  'Vendedora',
-  'Logistica',
-  'Soporte',
-  'Ventas',
+  'Owner',
+  'Gestion de Inventario',
+  'Administracion',
+  'Vendedor',
 ];
 
 export default function NuevoEmpleadoPage() {

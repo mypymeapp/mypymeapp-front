@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PATHROUTES } from "@/constants/pathroutes";
-import { PlusCircle, Search, UserCheck, UserX, LayoutGrid, List, Mail, Phone, User } from "lucide-react";
+import { PlusCircle, Search, UserCheck, UserX, LayoutGrid, List, Mail, Phone } from "lucide-react";
 type ViewMode = 'cards' | 'list';
 import Link from "next/link";
 import { mockEmpleados } from "@/mocks/data";
@@ -77,7 +77,7 @@ function EmpleadosPage() {
               onChange={e => setFiltroPuesto(e.target.value)}
               className="px-4 py-2 border border-border rounded-lg bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <option value="all">Todos los puestos</option>
+              <option value="all">Todos los roles</option>
               {puestos.map(p => (
                 <option key={p} value={p}>{p}</option>
               ))}
@@ -101,7 +101,7 @@ function EmpleadosPage() {
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <div className="bg-primary/10 p-3 rounded-full flex items-center justify-center w-12 h-12">
-                    <span className="font-bold text-primary text-2xl">{e.nombre.charAt(0)}</span>
+                    <span className="font-bold text-primary text-4xl">{e.nombre.charAt(0)}</span>
                   </div>
                   <div>
                     <h2 className="font-bold text-lg text-foreground">{e.nombre} {e.apellido}</h2>
@@ -110,9 +110,14 @@ function EmpleadosPage() {
                 </div>
               </div>
               <div className="flex-grow space-y-2 text-sm text-foreground/80 mb-6">
-                <p className="flex items-center gap-2"><User className="w-4 h-4 text-primary/70" /> {e.email}</p>
+                <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary/70" /> {e.email}</p>
                 <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary/70" /> {e.telefono}</p>
-                <p className="flex items-center gap-2"><UserCheck className="w-4 h-4 text-primary/70" /> {e.activo ? 'Activo' : 'Inactivo'}</p>
+                <p className="flex items-center gap-2">
+                  <UserCheck className={`w-4 h-4 ${e.activo ? 'text-green-700' : 'text-red-700'}`} />
+                  <span className={e.activo ? 'text-green-700 font-bold' : 'text-red-700 font-bold'}>
+                    {e.activo ? 'Activo' : 'Inactivo'}
+                  </span>
+                </p>
               </div>
             </Card>
           ))}
@@ -124,7 +129,7 @@ function EmpleadosPage() {
               <tr>
                 <th className="p-4 font-semibold">Nombre</th>
                 <th className="p-4 font-semibold">Apellido</th>
-                <th className="p-4 font-semibold">Puesto</th>
+                <th className="p-4 font-semibold">Rol</th>
                 <th className="p-4 font-semibold">Email</th>
                 <th className="p-4 font-semibold text-center">Activo</th>
               </tr>
@@ -136,7 +141,7 @@ function EmpleadosPage() {
                   <td className="p-4">{e.apellido}</td>
                   <td className="p-4">{e.rol}</td>
                   <td className="p-4">{e.email}</td>
-                  <td className="p-4 text-center">{e.activo ? <span className="text-green-500 font-bold">Sí</span> : <span className="text-red-500 font-bold">No</span>}</td>
+                  <td className="p-4 text-center">{e.activo ? <span className="text-green-700 font-bold">Sí</span> : <span className="text-red-700 font-bold">No</span>}</td>
                 </tr>
               ))}
             </tbody>
