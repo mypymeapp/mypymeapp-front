@@ -20,11 +20,14 @@ export const PATHROUTES = {
     proveedores_nuevo: '/pymes/proveedores/nuevo',
     proveedor_detalle: (id: string) => `/pymes/proveedores/${id}`,
     clientes: '/pymes/clientes',
+    clientes_nuevo: '/pymes/clientes/nuevo',
+    clientes_editar: (id: string) => `/pymes/clientes/${id}/editar`,
+    clientes_detalle: (id: string) => `/pymes/clientes/${id}`,   
     reportes: '/pymes/reportes',
     soporte: '/pymes/soporte',
     configuracion: '/pymes/configuracion',
     configuracion_perfil: '/pymes/configuracion/perfil',
-    configuracion_personalizacion: '/pymes/configuracion/personalizacion',
+    suscripcion: '/pymes/configuracion/suscripcion',
   },
 
   admin: {

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PATHROUTES } from '@/constants/pathroutes';
-import { PlusCircle, MoreVertical, Phone, Mail, User, LayoutGrid, List, Search, Loader2, AlertTriangle, Package, DollarSign, Truck, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, Phone, Mail, User, LayoutGrid, List, Search, Loader2, AlertTriangle, Package, DollarSign, Truck } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
@@ -159,7 +159,7 @@ export default function ProveedoresPage() {
             </div>
         </Card>
       ) : viewMode === 'cards' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
           {filteredProveedores.map(p => (
             <Card key={p.id} className="flex flex-col">
               <div className="flex justify-between items-start mb-4">
@@ -169,7 +169,7 @@ export default function ProveedoresPage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-lg text-foreground">{p.name}</h2>
-                    <p className="text-sm text-foreground/60">{p.cif || p.country}</p>
+                    <p className="text-sm text-foreground/60">{p.cif}</p>
                   </div>
                 </div>
               </div>
@@ -178,10 +178,10 @@ export default function ProveedoresPage() {
                 <p className="flex items-center gap-2"><Phone className="w-4 h-4 text-primary/70" /> {p.phone || 'N/A'}</p>
                 <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary/70" /> {p.email || 'N/A'}</p>
               </div>
-              <div className="flex gap-2 mt-auto">
+              <div className="flex flex-wrap gap-2 mt-auto">
                  <Link href={PATHROUTES.pymes.proveedor_detalle(p.id)} className="flex-grow"><Button variant='outline' className="w-full">Ver Detalles</Button></Link>
-                 <Button variant="outline" className="px-4" onClick={() => handleEdit(p.id)}>Editar</Button>
-                 <Button variant="danger" className="px-4" onClick={() => confirmDelete(p.id)}>Eliminar</Button>
+                 <Button variant="outline" className="flex-grow sm:flex-grow-0" onClick={() => handleEdit(p.id)}>Editar</Button>
+                 <Button variant="danger" className="flex-grow sm:flex-grow-0" onClick={() => confirmDelete(p.id)}>Eliminar</Button>
               </div>
             </Card>
           ))}
