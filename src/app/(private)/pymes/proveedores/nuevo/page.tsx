@@ -5,93 +5,109 @@ import * as Yup from 'yup';
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { Select } from '@/components/ui/Select';
 import { ArrowLeft } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Category } from '@/mocks/types';
 
-const monedas = [
-    { value: 'ARS', label: 'Peso Argentino (ARS)' },
-    { value: 'CLP', label: 'Peso Chileno (CLP)' },
-    { value: 'USD', label: 'Dólar Estadounidense (USD)' },
-    { value: 'EUR', label: 'Euro (EUR)' },
-];
+const paises = [ { value: 'ARGENTINA', label: 'Argentina' }, { value: 'URUGUAY', label: 'Uruguay' }, { value: 'CHILE', label: 'Chile' } ];
+const monedas = [ { value: 'ARS', label: 'Peso Argentino (ARS)' }, { value: 'CLP', label: 'Peso Chileno (CLP)' }, { value: 'USD', label: 'Dólar (USD)' }, { value: 'EUR', label: 'Euro (EUR)' } ];
 
 export default function NuevoProveedorPage() {
+    const { data: session } = useSession();
+    const router = useRouter();
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            if(!session) return;
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } });
+                if (res.ok) setCategories(await res.json());
+            } catch (error) { toast.error("Error al cargar categorías"); }
+        }
+        if(session) fetchCategories();
+    }, [session]);
+
     const formik = useFormik({
         initialValues: {
-            nombre: '',
-            cif: '',
-            telefono: '',
+            name: '',
             email: '',
-            nombreContacto: '',
-            direccion: '',
-            moneda: 'USD',
+            phone: '',
+            contactName: '',
+            address: '',
+            country: 'ARGENTINA',
+            categoryId: '',
+           
         },
         validationSchema: Yup.object({
-            nombre: Yup.string().required('El nombre es requerido'),
-            cif: Yup.string().required('La identificación fiscal es requerida'),
-            telefono: Yup.string().required('El teléfono es requerido'),
+            name: Yup.string().required('El nombre es requerido'),
             email: Yup.string().email('Email no válido').required('El email es requerido'),
-            nombreContacto: Yup.string().required('El nombre del contacto es requerido'),
-            direccion: Yup.string().required('La dirección es requerida'),
-            moneda: Yup.string().required('La moneda es requerida'),
+            phone: Yup.string().required('El teléfono es requerido'),
+            contactName: Yup.string().required('El nombre del contacto es requerido'),
+            address: Yup.string().required('La dirección es requerida'),
+            country: Yup.string().required('El país es requerido'),
+            categoryId: Yup.string().required('La categoría es requerida'),
         }),
-        onSubmit: (values, { resetForm }) => {
-            toast.success('¡Proveedor creado con éxito! (simulación)');
-            console.log(values);
-            resetForm();
+        onSubmit: async (values, { setSubmitting }) => {
+            if (!session?.user?.companyId || !session.accessToken) {
+                toast.error("Sesión o ID de compañía no válidos.");
+                setSubmitting(false);
+                return;
+            }
+            setSubmitting(true);
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/supplier`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.accessToken}` },
+                    body: JSON.stringify({
+                        ...values,
+                        companyId: session.user.companyId 
+                    }),
+                });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || 'Error al crear el proveedor.');
+                }
+                toast.success('¡Proveedor creado con éxito!');
+                router.push(PATHROUTES.pymes.proveedores);
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : 'Ocurrió un error desconocido.');
+            } finally {
+                setSubmitting(false);
+            }
         },
     });
 
     return (
         <div className="p-4 md:p-8">
             <div className="flex items-center gap-4 mb-8">
-                <Link href={PATHROUTES.pymes.proveedores}>
-                    <Button variant="outline" className="px-3">
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                </Link>
+                <Link href={PATHROUTES.pymes.proveedores}><Button variant="outline" className="px-3"><ArrowLeft className="h-5 w-5" /></Button></Link>
                 <h1 className="text-3xl font-bold text-foreground">Crear Nuevo Proveedor</h1>
             </div>
-
             <Card isClickable={false}>
                 <form onSubmit={formik.handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <Input id="nombre" label="Nombre del Proveedor" {...formik.getFieldProps('nombre')} />
-                            {formik.touched.nombre && formik.errors.nombre ? <div className="text-red-500 text-xs mt-1">{formik.errors.nombre}</div> : null}
-                        </div>
-                        <div>
-                            <Input id="cif" label="Identificación Fiscal (CUIT/NIF/etc.)" {...formik.getFieldProps('cif')} />
-                            {formik.touched.cif && formik.errors.cif ? <div className="text-red-500 text-xs mt-1">{formik.errors.cif}</div> : null}
-                        </div>
-                        <div>
-                            <Input id="telefono" label="Teléfono" {...formik.getFieldProps('telefono')} />
-                            {formik.touched.telefono && formik.errors.telefono ? <div className="text-red-500 text-xs mt-1">{formik.errors.telefono}</div> : null}
-                        </div>
-                        <div>
-                            <Input id="email" label="Email de Contacto" type="email" {...formik.getFieldProps('email')} />
-                            {formik.touched.email && formik.errors.email ? <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div> : null}
-                        </div>
-                        <div>
-                            <Input id="nombreContacto" label="Nombre de la Persona de Contacto" {...formik.getFieldProps('nombreContacto')} />
-                            {formik.touched.nombreContacto && formik.errors.nombreContacto ? <div className="text-red-500 text-xs mt-1">{formik.errors.nombreContacto}</div> : null}
-                        </div>
-                         <div>
-                            <label htmlFor="moneda" className="block text-sm font-medium text-foreground/80 mb-2">Moneda Principal</label>
-                            <select id="moneda" {...formik.getFieldProps('moneda')} className="w-full px-4 py-3 text-foreground bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                                {monedas.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                            </select>
-                            {formik.touched.moneda && formik.errors.moneda ? <div className="text-red-500 text-xs mt-1">{formik.errors.moneda}</div> : null}
-                        </div>
-                    </div>
-                    <div>
-                        <Input id="direccion" label="Dirección (para el mapa)" {...formik.getFieldProps('direccion')} />
-                        {formik.touched.direccion && formik.errors.direccion ? <div className="text-red-500 text-xs mt-1">{formik.errors.direccion}</div> : null}
+                        <Input id="name" label="Nombre del Proveedor" {...formik.getFieldProps('name')} />
+                        <Input id="contactName" label="Nombre de Contacto" {...formik.getFieldProps('contactName')} />
+                        <Input id="email" label="Email" type="email" {...formik.getFieldProps('email')} />
+                        <Input id="phone" label="Teléfono" {...formik.getFieldProps('phone')} />
+                        <Input id="address" label="Dirección (para el mapa)" {...formik.getFieldProps('address')} />
+                        <Select id="country" label="País" {...formik.getFieldProps('country')}>
+                            {paises.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+                        </Select>
+                        <Select id="categoryId" label="Categoría" {...formik.getFieldProps('categoryId')}>
+                             <option value="">Selecciona una categoría</option>
+                             {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                        </Select>
                     </div>
                     <div className="flex justify-end pt-4">
-                        <Button type="submit">Guardar Proveedor</Button>
+                        <Button type="submit" disabled={formik.isSubmitting}>{formik.isSubmitting ? 'Guardando...' : 'Guardar Proveedor'}</Button>
                     </div>
                 </form>
             </Card>
