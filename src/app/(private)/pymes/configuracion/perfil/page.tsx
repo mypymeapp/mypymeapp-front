@@ -1,168 +1,179 @@
 'use client';
 
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ArrowLeft, Upload, Building, CheckCircle } from 'lucide-react';
+import { Upload, User, Building, Loader2, Save } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import Link from 'next/link';
-import { PATHROUTES } from '@/constants/pathroutes';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image';
-import { useRef, useEffect } from 'react';
-
-const paises = [
-    { value: 'AR', label: 'Argentina' },
-    { value: 'UY', label: 'Uruguay' },
-    { value: 'CL', label: 'Chile' },
-    { value: 'ES', label: 'España' },
-    { value: 'MX', label: 'México' },
-];
+import { useRef, useState, useEffect, useMemo } from 'react';
 
 export default function PerfilPage() {
-    const { data: session, update } = useSession();
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { data: session, status, update } = useSession({ required: true });
+    
+    const [userName, setUserName] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    
+    const userAvatarRef = useRef<HTMLInputElement>(null);
+    const companyLogoRef = useRef<HTMLInputElement>(null);
 
-    const formik = useFormik({
-        initialValues: {
-            name: '',
-            pais: 'AR',
-            razonSocial: '',
-            rut_Cuit: '',
-            rubroPrincipal: '',
-        },
-        validationSchema: Yup.object({
-            name: Yup.string().required('El nombre de la empresa es requerido'),
-            pais: Yup.string().required('El país es requerido'),
-            razonSocial: Yup.string().required('La Razón Social es requerida'),
-            rut_Cuit: Yup.string().required('La identificación fiscal es requerida'),
-            rubroPrincipal: Yup.string().required('El rubro es requerido'),
-        }),
-        onSubmit: async (values, { setSubmitting }) => {
-            if (!session?.user?.email || !session.accessToken) {
-                toast.error('Sesión no válida.');
-                setSubmitting(false);
-                return;
-            }
-            setSubmitting(true);
-            try {
-                const companyData = {
-                    ...values,
-                    mail: session.user.email,
-                    password: "password_provisional_123"
-                };
+    useEffect(() => {
+      if (status === 'authenticated' && session.user) {
+        setUserName(session.user.name || '');
+        setCompanyName(session.user.companyName || '');
+      }
+    }, [session, status]);
+    
+    const haveTextChanged = useMemo(() => {
+        if (!session?.user) return false;
+        const nameChanged = userName !== (session.user.name || '');
+        const companyNameChanged = companyName !== (session.user.companyName || '');
+        return nameChanged || companyNameChanged;
+    }, [userName, companyName, session]);
 
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/companies`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${session.accessToken}`
-                    },
-                    body: JSON.stringify(companyData)
-                });
+    const handleFileUpload = async (file: File, endpoint: string, key: 'avatar' | 'logo') => {
+        if (!session?.accessToken) throw new Error('Sesión no válida.');
+        const formData = new FormData();
+        formData.append(key, file);
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${session.accessToken}` },
+            body: formData,
+        });
+        if (!res.ok) {
+            const errorBody = await res.json().catch(() => ({ message: 'Error desconocido del servidor.' }));
+            throw new Error(errorBody.message || 'Error al subir el archivo.');
+        }
+        return res.json();
+    };
 
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.message || 'Error al guardar la empresa.');
-                }
-                
-                const newCompany = await res.json();
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !session?.user?.id) return;
 
-                await update({
-                    user: {
-                        ...session.user,
-                        companyId: newCompany.id,
-                        companyName: newCompany.name,
-                    }
-                });
-
-                toast.success('¡Datos de la empresa guardados con éxito!');
-            } catch (error) {
-                 toast.error(error instanceof Error ? error.message : 'Ocurrió un error desconocido.');
-            } finally {
-                setSubmitting(false);
-            }
-        },
-    });
-
-    const isCompanyConfigured = !!session?.user?.companyName;
-
-    const getIdentificacionLabel = (pais: string) => {
-        switch (pais) {
-          case 'AR': return 'CUIT (Sin guiones)';
-          case 'UY': case 'CL': return 'RUT (Sin puntos ni guiones)';
-          case 'ES': return 'NIF';
-          case 'MX': return 'RFC';
-          default: return 'Identificación Fiscal';
+        const toastId = toast.loading('Subiendo avatar...');
+        try {
+            const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/users/${session.user.id}/avatar`;
+            const data = await handleFileUpload(file, apiUrl, 'avatar');
+            
+            await update({ ...session, user: { ...session.user, image: data.avatarUrl } });
+            toast.success('¡Avatar actualizado!', { id: toastId });
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error al subir el avatar.', { id: toastId });
         }
     };
     
-    return (
-        <div className="p-4 md:p-8">
-            <div className="flex items-center gap-4 mb-8">
-                <Link href={PATHROUTES.pymes.configuracion}>
-                    <Button variant="outline" className="px-3"><ArrowLeft className="h-5 w-5" /></Button>
-                </Link>
-                <h1 className="text-3xl font-bold text-foreground">Perfil de la Empresa</h1>
-            </div>
+    const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !session?.user?.companyId) return;
 
-            {isCompanyConfigured ? (
-                <Card isClickable={false}>
-                    <div className="flex items-center gap-4 text-green-400">
-                        <CheckCircle className="w-8 h-8" />
-                        <div>
-                             <h2 className="text-xl font-bold">¡Todo listo!</h2>
-                             <p className="text-foreground/70 mt-1">
-                                Tu empresa <span className="font-bold text-primary">{session.user.companyName}</span> está configurada.
-                            </p>
+        const toastId = toast.loading('Subiendo logo...');
+        try {
+            const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/companies/${session.user.companyId}/logo`;
+            const data = await handleFileUpload(file, apiUrl, 'logo');
+            
+            await update({ ...session, user: { ...session.user, logoUrl: data.logoUrl } });
+            toast.success('¡Logo actualizado!', { id: toastId });
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error al subir el logo.', { id: toastId });
+        }
+    };
+    
+    const handleSaveChanges = async () => {
+        if (!session?.user) return;
+        const toastId = toast.loading('Guardando cambios...');
+        try {
+            await update({ ...session, user: { ...session.user, name: userName, companyName: companyName } });
+            toast.success('¡Cambios guardados!', { id: toastId });
+        } catch (error) {
+            toast.error('No se pudieron guardar los cambios.', { id: toastId });
+        }
+    };
+
+    const getInitials = (name: string) => {
+        if (!name) return '';
+        return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    };
+    
+    if (status === 'loading' || !session?.user) {
+        return <div className="flex justify-center items-center p-12"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+    }
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <Card isClickable={false} className="lg:col-span-1 flex flex-col">
+                <div className="flex-grow">
+                    <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2"><User /> Tu Perfil</h2>
+                    <div className="flex flex-col items-center text-center">
+                        <div className="relative w-32 h-32 mb-4 group">
+                            {session.user.image ? (
+                                <Image
+                                    src={session.user.image}
+                                    alt="Avatar de usuario"
+                                    fill
+                                    className="rounded-full object-cover bg-border"
+                                    key={session.user.image}
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-full bg-primary/10 flex items-center justify-center text-primary text-4xl font-bold">
+                                    {getInitials(session.user.name || '')}
+                                </div>
+                            )}
+                            <button
+                                onClick={() => userAvatarRef.current?.click()}
+                                className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <Upload className="w-6 h-6" />
+                            </button>
+                            <input type="file" ref={userAvatarRef} onChange={handleAvatarUpload} className="hidden" accept="image/*" />
                         </div>
+                        <Input id="userName" label="Nombre Completo" value={userName} onChange={(e) => setUserName(e.target.value)} className="text-center" />
+                        <p className="text-sm text-foreground/60 mt-2">{session.user.email}</p>
                     </div>
-                </Card>
-            ) : (
-                <Card isClickable={false}>
-                    <div className="flex items-center gap-4 mb-6 text-yellow-400">
-                        <Building className="w-8 h-8" />
-                        <div>
-                            <h2 className="text-xl font-bold">¡Completa tu perfil!</h2>
-                            <p className="text-foreground/70">Registra los datos de tu empresa para desbloquear todo el potencial de la aplicación.</p>
+                </div>
+                <div className="mt-6 flex justify-end">
+                    <Button onClick={handleSaveChanges} disabled={!haveTextChanged}>
+                        <Save className="mr-2 h-4 w-4" /> Guardar Cambios
+                    </Button>
+                </div>
+            </Card>
+
+            <Card isClickable={false} className="lg:col-span-2 flex flex-col">
+                <div className="flex-grow">
+                    <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2"><Building /> Datos de la Empresa</h2>
+                    <div className="flex flex-col items-center text-center">
+                        <div className="relative w-48 h-24 mb-4 group">
+                            {session.user.logoUrl ? (
+                                <Image
+                                    src={session.user.logoUrl}
+                                    alt="Logo de la empresa"
+                                    layout="fill"
+                                    className="object-contain"
+                                    key={session.user.logoUrl}
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-lg bg-border flex items-center justify-center text-foreground/50">
+                                    <p>Sin logo</p>
+                                </div>
+                            )}
+                            <button
+                                onClick={() => companyLogoRef.current?.click()}
+                                className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                                <Upload className="w-6 h-6" />
+                            </button>
+                            <input type="file" ref={companyLogoRef} onChange={handleLogoUpload} className="hidden" accept="image/*" />
                         </div>
+                        <Input id="companyName" label="Nombre de la Empresa" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="text-center" />
                     </div>
-                    <form onSubmit={formik.handleSubmit} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <Input id="name" label="Nombre de tu PYME" {...formik.getFieldProps('name')} />
-                                {formik.touched.name && formik.errors.name ? <div className="text-red-500 text-xs mt-1">{formik.errors.name}</div> : null}
-                            </div>
-                            <div>
-                                <label htmlFor="pais" className="block text-sm font-medium text-foreground/80 mb-2">País</label>
-                                <select id="pais" {...formik.getFieldProps('pais')} className="w-full px-4 py-3 text-foreground bg-background border border-border rounded-lg">
-                                    {paises.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
-                                </select>
-                                {formik.touched.pais && formik.errors.pais ? <div className="text-red-500 text-xs mt-1">{formik.errors.pais}</div> : null}
-                            </div>
-                            <div>
-                                <Input id="razonSocial" label="Razón Social" {...formik.getFieldProps('razonSocial')} />
-                                {formik.touched.razonSocial && formik.errors.razonSocial ? <div className="text-red-500 text-xs mt-1">{formik.errors.razonSocial}</div> : null}
-                            </div>
-                            <div>
-                                <Input id="rut_Cuit" label={getIdentificacionLabel(formik.values.pais)} {...formik.getFieldProps('rut_Cuit')} />
-                                {formik.touched.rut_Cuit && formik.errors.rut_Cuit ? <div className="text-red-500 text-xs mt-1">{formik.errors.rut_Cuit}</div> : null}
-                            </div>
-                        </div>
-                        <div>
-                            <Input id="rubroPrincipal" label="Rubro Principal" {...formik.getFieldProps('rubroPrincipal')} />
-                            {formik.touched.rubroPrincipal && formik.errors.rubroPrincipal ? <div className="text-red-500 text-xs mt-1">{formik.errors.rubroPrincipal}</div> : null}
-                        </div>
-                        <div className="flex justify-end pt-4">
-                            <Button type="submit" disabled={formik.isSubmitting}>
-                                {formik.isSubmitting ? 'Guardando...' : 'Guardar Datos de la Empresa'}
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-            )}
+                </div>
+                <div className="mt-6 flex justify-end">
+                    <Button onClick={handleSaveChanges} disabled={!haveTextChanged}>
+                        <Save className="mr-2 h-4 w-4" /> Guardar Cambios
+                    </Button>
+                </div>
+            </Card>
         </div>
     );
 }

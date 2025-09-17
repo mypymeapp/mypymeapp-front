@@ -1,17 +1,10 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 
-interface AppUser {
-    id?: string;
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    companyName?: string | null;
-    role?: string;
-    logoUrl?: string | null;
-}
+// Ahora usamos la Session directamente, que ya tiene los tipos correctos
+type AppUser = NonNullable<ReturnType<typeof useSession>['data']>['user'];
 
 interface AuthContextType {
     user: AppUser | null;
@@ -29,26 +22,19 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
     const { data: session, status } = useSession();
-    const [appUser, setAppUser] = useState<AppUser | null>(null);
 
-    useEffect(() => {
-        if (status === 'authenticated' && session?.user) {
-            setAppUser(session.user);
-        } else {
-            setAppUser(null);
-        }
-    }, [session, status]);
+    const user = session?.user || null;
 
     const isAuthenticated = status === 'authenticated';
-    const isCompanyConfigured = !!appUser?.companyName;
-    const isPremium = isAuthenticated;
+    const isCompanyConfigured = !!user?.companyName;
+    const isPremium = user?.role === 'premium';
 
     const logout = () => {
         signOut({ callbackUrl: '/' });
     };
 
     const value = {
-        user: appUser,
+        user,
         isAuthenticated,
         isCompanyConfigured,
         isPremium,

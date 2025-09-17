@@ -27,7 +27,7 @@ export const PATHROUTES = {
     soporte: '/pymes/soporte',
     configuracion: '/pymes/configuracion',
     configuracion_perfil: '/pymes/configuracion/perfil',
-    configuracion_personalizacion: '/pymes/configuracion/personalizacion',
+    suscripcion: '/pymes/configuracion/suscripcion',
   },
 
   admin: {
