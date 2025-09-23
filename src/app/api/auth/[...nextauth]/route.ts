@@ -1,94 +1,95 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import GoogleProvider from "next-auth/providers/google"
-import { User } from "next-auth"
+import NextAuth, { AuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
-    
     CredentialsProvider({
-        name: 'Credentials',
-        credentials: {
-          user: { type: "text" },
-        },
-        async authorize(credentials) {
-            if (!credentials?.user) return null;
-            try {
-                const user = JSON.parse(credentials.user);
-                if (user) return user;
-                return null;
-            } catch (error) {
-                return null;
-            }
+      name: "Credentials",
+      credentials: { 
+        backendResponse: { type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.backendResponse) {
+          return null;
         }
-    })
+        try {
+          const { token, user } = JSON.parse(credentials.backendResponse);
+          if (token && user) {
+            return { ...user, accessToken: token };
+          }
+          return null;
+        } catch (error) {
+          console.error("Error al autorizar credenciales:", error);
+          return null;
+        }
+      },
+    }),
   ],
-  
   session: { strategy: "jwt" },
-
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === 'google') {
+      if (account?.provider === "google") {
         try {
-          
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: user.name,
-              email: user.email,
-              avatarUrl: user.image,
-            }),
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: user.name, email: user.email, avatarUrl: user.image }),
           });
-          
           if (!res.ok) return false;
-
           const backendData = await res.json();
-          
           user.accessToken = backendData.token;
           user.id = backendData.user.id;
           user.role = backendData.user.role;
           user.company = backendData.user.company;
-          
+          user.image = backendData.user.avatarUrl;
           return true;
-        } catch (error) {
+        } catch (error) { 
           console.error("Error en signIn de Google:", error);
-          return false;
+          return false; 
         }
       }
       return true;
     },
-
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session) {
+        return { ...token, ...session };
+      }
       if (user) {
-        token.id = user.id;
-        token.accessToken = user.accessToken;
-        token.companyId = user.company?.id || user.companyId || null;
-        token.companyName = user.company?.name || user.companyName || null;
-        token.role = user.role;
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.avatarUrl || user.image,
+          role: user.role,
+          accessToken: user.accessToken,
+          companyId: user.company?.id || null,
+          companyName: user.company?.name || null,
+          logoUrl: user.company?.logoUrl || null,
+          subscriptionStatus: user.company?.subscriptionStatus || 'FREE',
+        };
       }
       return token;
     },
-
     async session({ session, token }) {
-      if (token && session.user) { 
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.companyId = token.companyId;
-        session.user.companyName = token.companyName;
-        session.accessToken = token.accessToken;
-      }
+      session.user.id = token.id;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      session.user.image = token.image;
+      session.user.role = token.role;
+      session.user.companyId = token.companyId;
+      session.user.companyName = token.companyName;
+      session.user.logoUrl = token.logoUrl;
+      session.user.subscriptionStatus = token.subscriptionStatus;
+      session.accessToken = token.accessToken;
       return session;
-    }
+    },
   },
-
-  pages: { signIn: '/login', error: '/login' },
+  pages: { signIn: "/login", error: "/login" },
   secret: process.env.NEXTAUTH_SECRET,
-}
-
+};
 const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST };
