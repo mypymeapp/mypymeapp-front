@@ -45,34 +45,24 @@ export default function LoginPage() {
           headers: { "Content-Type": "application/json" }
         });
 
-        if (!loginRes.ok) {
-            throw new Error("Las credenciales son incorrectas.");
-        }
-
-        const data = await loginRes.json();
+        const backendData = await loginRes.json();
         
-        const userToSignIn = {
-            id: data.user.id,
-            name: data.user.name,
-            email: data.user.email,
-            accessToken: data.token,
-            companyId: data.user.company?.id || null,
-            companyName: data.user.company?.name || null,
-            role: data.user.role,
-        };
-
+        if (!loginRes.ok) {
+            throw new Error(backendData.message || "Las credenciales son incorrectas.");
+        }
+        
         const result = await signIn('credentials', {
             redirect: false,
-            user: JSON.stringify(userToSignIn),
+            backendResponse: JSON.stringify(backendData),
         });
         
-        if (!result?.ok) {
-            throw new Error("Hubo un problema al crear la sesión local.");
+        if (!result?.ok || result.error) {
+            throw new Error("Hubo un problema al iniciar la sesión local.");
         }
         
         toast.success('¡Bienvenido de vuelta!');
 
-        if (userToSignIn.companyName) {
+        if (backendData.user.company?.name) {
             router.push(PATHROUTES.pymes.dashboard);
         } else {
             router.push(PATHROUTES.onboarding.create_company);
@@ -137,4 +127,3 @@ export default function LoginPage() {
     </div>
   );
 }
-

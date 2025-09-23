@@ -2,16 +2,24 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, Star } from 'lucide-react';
+import { User, Star, Users } from 'lucide-react';
 import { PATHROUTES } from '@/constants/pathroutes';
+import { useAuth } from '@/context/AuthContext';
 
 const navLinks = [
-  { href: PATHROUTES.pymes.suscripcion, label: 'Suscripción', icon: Star },
-  { href: PATHROUTES.pymes.configuracion_perfil, label: 'Perfil y Empresa', icon: User },
+  { href: PATHROUTES.pymes.suscripcion, label: 'Suscripción', icon: Star, premium: false },
+  { href: PATHROUTES.pymes.configuracion_perfil, label: 'Perfil y Empresa', icon: User, premium: false },
+  { href: PATHROUTES.pymes.miembros, label: 'Miembros del Equipo', icon: Users, premium: true },
 ];
 
 export default function ConfiguracionLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { isPremium } = useAuth();
+  
+  const availableLinks = navLinks.filter(link => {
+
+    return link.premium ? isPremium : true;
+  });
 
   return (
     <div className="p-4 md:p-8">
@@ -20,14 +28,14 @@ export default function ConfiguracionLayout({ children }: { children: React.Reac
         <p className="text-foreground/60 mt-1">Gestiona los detalles de tu cuenta y la apariencia de la aplicación.</p>
       </div>
 
-      <div className="flex border-b border-border mb-8">
-        {navLinks.map((link) => {
+      <div className="flex border-b border-border mb-8 overflow-x-auto">
+        {availableLinks.map((link) => {
           const isActive = pathname.startsWith(link.href);
           return (
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-2 px-4 py-3 font-semibold border-b-2 transition-colors ${
+              className={`flex items-center gap-2 px-4 py-3 font-semibold border-b-2 transition-colors flex-shrink-0 ${
                 isActive
                   ? 'border-primary text-primary'
                   : 'border-transparent text-foreground/60 hover:text-foreground'

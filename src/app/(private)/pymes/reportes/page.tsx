@@ -1,23 +1,45 @@
+'use client';
 
-import { Card } from "@/components/ui/Card";
-import { BarChart3 } from "lucide-react";
+import { useAuth } from '@/context/AuthContext';
+import { Loader2 } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Star } from 'lucide-react';
+import Link from 'next/link';
+import { PATHROUTES } from '@/constants/pathroutes';
+
+const NonPremiumView = () => (
+  <div className="flex items-center justify-center p-4">
+    <Card isClickable={false} className="max-w-md text-center">
+      <Star className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+      <h1 className="text-2xl font-bold text-foreground">Esta es una función Premium</h1>
+      <p className="text-foreground/70 mt-2">
+        Actualiza tu plan para acceder a reportes inteligentes y análisis avanzados.
+      </p>
+      <Link href={PATHROUTES.pymes.suscripcion}>
+        <Button className="mt-8">Ir a la página de Suscripción</Button>
+      </Link>
+    </Card>
+  </div>
+);
 
 export default function ReportesPage() {
-    return (
-        <div className="p-4 md:p-8">
-            <h1 className="text-3xl font-bold text-foreground mb-8">Centro de Reportes</h1>
+  const { isPremium, isAuthenticated } = useAuth();
 
-            
-            <Card>
-                <div className="flex flex-col items-center justify-center text-center p-12">
-                    <BarChart3 className="w-16 h-16 text-primary/50 mb-4" />
-                    <h2 className="text-xl font-semibold text-foreground">Reportes Avanzados Próximamente</h2>
-                    <p className="text-foreground/60 mt-2 max-w-md">
-                        Estamos trabajando para traerte análisis detallados y gráficos interactivos sobre tus ventas, compras y rendimiento financiero.
-                    </p>
-                </div>
-            </Card>
-            
-        </div>
-    )
+  if (!isAuthenticated) {
+    return <div className="flex items-center justify-center p-8"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+  }
+
+  if (!isPremium) {
+    return <NonPremiumView />;
+  }
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-foreground">Reportes Avanzados</h1>
+      <p className="text-foreground/70 mt-2">
+        Bienvenido al panel de reportes.
+      </p>
+    </div>
+  );
 }
