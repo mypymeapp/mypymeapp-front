@@ -2,6 +2,7 @@
 
 import { SessionProvider } from 'next-auth/react';
 import { AuthProvider } from '@/context/AuthContext';
+import { MembersProvider } from '@/context/MembersContext';
 import { ReactNode, useState, useEffect } from 'react';
 import { Toaster, useToasterStore } from 'react-hot-toast';
 import { Backdrop } from './ui/Backdrop';
@@ -46,8 +47,10 @@ export const Providers = ({ children }: ProvidersProps) => {
   return (
     <SessionProvider>
       <AuthProvider>
-        {children}
-        <ToasterWithBackdrop />
+        <MembersProvider>
+          {children}
+          <ToasterWithBackdrop />
+        </MembersProvider>
       </AuthProvider>
     </SessionProvider>
   );
