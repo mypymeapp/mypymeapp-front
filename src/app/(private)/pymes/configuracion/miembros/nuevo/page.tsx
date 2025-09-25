@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
@@ -21,6 +21,7 @@ const roles = [
 
 export default function NuevoEmpleadoPage() {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { createMember } = useMembers();
 
@@ -95,13 +96,41 @@ export default function NuevoEmpleadoPage() {
             </div>
 
             <div>
-              <Input 
-                id="password" 
-                label="Contraseña" 
-                type="password" 
-                {...formik.getFieldProps('password')} 
-                disabled={loading}
-              />
+              <div className="relative w-full group">
+                <div
+                  className="absolute -inset-0.5 bg-gradient-to-r from-primary to-foreground rounded-lg blur opacity-0 group-focus-within:opacity-100 transition duration-300"
+                  aria-hidden="true"
+                />
+                <div className="relative h-[49px]">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="block w-full h-full px-4 pr-12 text-foreground bg-card border border-border rounded-lg placeholder-foreground/50 focus:outline-none focus:ring-0 peer"
+                    placeholder=" "
+                    {...formik.getFieldProps('password')}
+                    disabled={loading}
+                  />
+                  <label
+                    htmlFor="password"
+                    className="absolute text-sm text-foreground/70 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-card px-2 peer-focus:px-2 peer-focus:text-primary peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-1"
+                  >
+                    Contraseña
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-foreground/60 hover:text-foreground transition-colors"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    disabled={loading}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
               {formik.touched.password && formik.errors.password ? 
                 <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div> : null
               }

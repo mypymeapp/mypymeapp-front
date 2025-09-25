@@ -18,7 +18,7 @@ export default function ConfiguracionLayout({ children }: { children: React.Reac
   
   const availableLinks = navLinks.filter(link => {
     if (link.premium && !isPremium) return false;
-    if ((link as any).requireOwner && user?.role !== 'OWNER') return false;
+    if ((link).requireOwner && user?.role !== 'OWNER') return false;
     return true;
   });
 
