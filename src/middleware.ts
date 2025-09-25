@@ -37,6 +37,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL(PATHROUTES.pymes.suscripcion, req.url));
   }
 
+  // Solo OWNER puede acceder a Miembros del Equipo
+  if (pathname.startsWith(PATHROUTES.pymes.miembros) && token.role !== 'OWNER') {
+    return NextResponse.redirect(new URL(PATHROUTES.pymes.configuracion, req.url));
+  }
+
   if (token.role !== 'SUPERADMIN' && isSuperAdminRoute) {
     return NextResponse.redirect(new URL(PATHROUTES.pymes.dashboard, req.url));
   }

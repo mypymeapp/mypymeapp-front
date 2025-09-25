@@ -9,16 +9,17 @@ import { useAuth } from '@/context/AuthContext';
 const navLinks = [
   { href: PATHROUTES.pymes.suscripcion, label: 'Suscripción', icon: Star, premium: false },
   { href: PATHROUTES.pymes.configuracion_perfil, label: 'Perfil y Empresa', icon: User, premium: false },
-  { href: PATHROUTES.pymes.miembros, label: 'Miembros del Equipo', icon: Users, premium: true },
+  { href: PATHROUTES.pymes.miembros, label: 'Miembros del Equipo', icon: Users, premium: true, requireOwner: true },
 ];
 
 export default function ConfiguracionLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { isPremium } = useAuth();
+  const { isPremium, user } = useAuth();
   
   const availableLinks = navLinks.filter(link => {
-
-    return link.premium ? isPremium : true;
+    if (link.premium && !isPremium) return false;
+    if ((link as any).requireOwner && user?.role !== 'OWNER') return false;
+    return true;
   });
 
   return (
