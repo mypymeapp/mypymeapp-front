@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { PlusCircle, Loader2, AlertTriangle, Edit, Trash2, LayoutGrid, List, Search, FolderKanban, Package } from 'lucide-react';
+import { PlusCircle, Loader2, AlertTriangle, Edit, Trash2, LayoutGrid, List, Search, FolderKanban, Package, SearchX } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import { Product, Category } from '@/mocks/types';
@@ -31,7 +31,7 @@ export default function InventarioPage() {
         setError(null);
         const [inventoryRes, categoriesRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/companies/${session.user.companyId}/inventory`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } }),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } })
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories/company/${session.user.companyId}`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } })
         ]);
 
         if (!inventoryRes.ok) throw new Error('Error al cargar el inventario.');
@@ -137,7 +137,7 @@ export default function InventarioPage() {
               <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={() => setIsModalOpen(true)}>
                       <FolderKanban className="mr-2 h-4 w-4" />
-                      Gestionar Categorías
+                      Categorias
                   </Button>
                   <div className="flex items-center gap-2 p-1 bg-background rounded-lg border border-border">
                     <button onClick={() => setViewMode('cards')} className={`p-2 rounded ${viewMode === 'cards' ? 'bg-primary text-button-text' : ''}`}><LayoutGrid className="h-5 w-5"/></button>
@@ -147,22 +147,57 @@ export default function InventarioPage() {
           </div>
         </Card>
 
-        {products.length === 0 ? (
+        {/* Mostrar mensaje especial si no hay categorías */}
+        {categories.length === 0 && products.length === 0 ? (
+            <Card isClickable={false}>
+                <div className="text-center py-12">
+                    <FolderKanban className="mx-auto h-12 w-12 text-primary/50" />
+                    <h3 className="mt-2 text-xl font-semibold">¡Comienza organizando tu inventario!</h3>
+                    <p className="mt-1 text-sm text-foreground/60">Primero crea categorías para organizar tus productos de manera eficiente.</p>
+                    <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                        <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2">
+                            <FolderKanban className="h-4 w-4" />
+                            Añadir tu primera categoría
+                        </Button>
+                        <p className='mt-4'>O</p>
+                        <Link href={PATHROUTES.pymes.inventario_nuevo}>
+                            <Button variant="outline" className="flex items-center gap-2">
+                                <Package className="h-4 w-4" />
+                                  Crear tu primer producto
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+            </Card>
+        ) : products.length === 0 ? (
             <Card isClickable={false}>
                 <div className="text-center py-12">
                     <Package className="mx-auto h-12 w-12 text-foreground/30" />
                     <h3 className="mt-2 text-xl font-semibold">Tu inventario está vacío</h3>
-                    <p className="mt-1 text-sm text-foreground/60">Empieza a añadir productos para gestionar tu stock.</p>
+                    <p className="mt-1 text-sm text-foreground/60">¡Ahora añade tus productos!</p>
                     <Link href={PATHROUTES.pymes.inventario_nuevo} className="mt-6 inline-block">
                         <Button>Añadir tu primer producto</Button>
                     </Link>
+                </div>
+            </Card>
+        ) : filteredProducts.length === 0 && searchTerm ? (
+            <Card isClickable={false}>
+                <div className="text-center py-12">
+                    <SearchX className="mx-auto h-12 w-12 text-foreground/30" />
+                    <h3 className="mt-2 text-xl font-semibold">No se encontraron productos</h3>
+                    <p className="mt-1 text-sm text-foreground/60">No hay productos que coincidan con <span className="font-semibold text-primary">{searchTerm}</span></p>
+                    <div className="mt-6">
+                        <Link href={PATHROUTES.pymes.inventario_nuevo}>
+                            <Button>Agregar nuevo producto</Button>
+                        </Link>
+                    </div>
                 </div>
             </Card>
         ) : (
             <>
                 {viewMode === 'cards' ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {products.map(product => (
+                    {filteredProducts.map(product => (
                       <Card key={product.id} className="flex flex-col">
                         <div className="flex-grow">
                           <h2 className="font-bold text-lg text-foreground truncate">{product.name}</h2>
@@ -199,7 +234,7 @@ export default function InventarioPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {products.map(product => (
+                        {filteredProducts.map(product => (
                           <tr key={product.id} className="border-b border-border last:border-b-0 hover:bg-background">
                             <td className="p-4 font-medium text-primary">{product.name}</td>
                             <td className="p-4 hidden md:table-cell">{product.sku}</td>
