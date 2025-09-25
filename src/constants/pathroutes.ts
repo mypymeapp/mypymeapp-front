@@ -29,6 +29,8 @@ export const PATHROUTES = {
     configuracion_perfil: '/pymes/configuracion/perfil',
     suscripcion: '/pymes/configuracion/suscripcion',
     miembros: '/pymes/configuracion/miembros',
+    miembros_nuevo: '/pymes/configuracion/miembros/nuevo',
+    miembros_editar: (id: string) => `/pymes/configuracion/miembros/${id}`,
   },
 
   superadmin: {
