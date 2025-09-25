@@ -57,7 +57,7 @@ export default function PymesLayout({ children }: { children: React.ReactNode })
           onClick={() => setIsSidebarOpen(false)}
         />
         <aside
-          className={`fixed top-0 left-0 h-full w-64 bg-card border-r border-border flex flex-col z-40 transition-transform duration-300 lg:sticky lg:translate-x-0 ${
+          className={`fixed top-0 left-0 h-screen w-64 bg-card border-r border-border flex flex-col z-40 transition-transform duration-300 lg:sticky lg:translate-x-0 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
