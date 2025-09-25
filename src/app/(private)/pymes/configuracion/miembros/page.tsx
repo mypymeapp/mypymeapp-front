@@ -84,7 +84,9 @@ export default function MiembrosPage() {
                   <Link href={PATHROUTES.pymes.miembros_editar(m.id)} className="w-full">
                     <Button variant="outline" className="w-full">Editar</Button>
                   </Link>
-                  <Button variant="danger" className="w-full" onClick={() => openDeleteConfirm(m.userId, m.user.name)}>Eliminar</Button>
+                  {m.role !== 'OWNER' && (
+                    <Button variant="danger" className="w-full" onClick={() => openDeleteConfirm(m.userId, m.user.name)}>Eliminar</Button>
+                  )}
                 </div>
               </Card>
             ))}
