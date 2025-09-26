@@ -1,19 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, PlusCircle, FolderOpen } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Category, Product } from '@/mocks/types';
+import { CreateCategoryModal } from '@/components/modals/CreateCategoryModal';
 
 export default function EditarProductoPage({ params }: { params: { id: string } }) {
     const { id: productId } = params;
@@ -22,30 +23,55 @@ export default function EditarProductoPage({ params }: { params: { id: string } 
     const [categories, setCategories] = useState<Category[]>([]);
     const [initialValues, setInitialValues] = useState({ name: '', sku: '', barcode: '', description: '', price: 0, cost: 0, categoryId: '', qty: 0, });
     const [loading, setLoading] = useState(true);
+    const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] = useState(false);
+
+    const fetchCategories = useCallback(async () => {
+        if (!session?.user?.companyId || !session?.accessToken) return;
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories/company/${session.user.companyId}`, {
+                headers: { 'Authorization': `Bearer ${session.accessToken}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setCategories(data);
+            }
+        } catch (error) {
+            console.error('Error al cargar categorías:', error);
+        }
+    }, [session]);
 
     useEffect(() => {
         const fetchData = async () => {
             if (!session?.accessToken) return;
             try {
-                const [productRes, categoriesRes] = await Promise.all([
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } }),
-                    fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } })
-                ]);
+                const productRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products/${productId}`, {
+                    headers: { 'Authorization': `Bearer ${session.accessToken}` }
+                });
+                
                 if (!productRes.ok) throw new Error('No se pudo cargar el producto.');
                 const productData: Product = await productRes.json();
-                const categoriesData = categoriesRes.ok ? await categoriesRes.json() : [];
+                
                 setInitialValues({
                     name: productData.name, sku: productData.sku, barcode: productData.barcode || '', description: productData.description || '',
                     price: productData.price, cost: productData.cost || 0, categoryId: productData.category?.id || '', qty: productData.qty || 0,
                 });
-                setCategories(categoriesData);
+                
+                // Cargar categorías por separado
+                await fetchCategories();
             } catch (error) {
                 toast.error(error instanceof Error ? error.message : 'Error al cargar los datos');
                 router.push(PATHROUTES.pymes.inventario);
             } finally { setLoading(false); }
         };
         if (session) fetchData();
-    }, [session, productId, router]);
+    }, [session, productId, router, fetchCategories]);
+
+    const handleCategoryCreated = (newCategoryId: string) => {
+        // Recargar las categorías
+        fetchCategories();
+        // Seleccionar automáticamente la nueva categoría
+        formik.setFieldValue('categoryId', newCategoryId);
+    };
 
     const formik = useFormik({
         initialValues: initialValues,
@@ -75,7 +101,13 @@ export default function EditarProductoPage({ params }: { params: { id: string } 
     if (loading) { return <div className="p-8 flex justify-center"><Loader2 className="animate-spin h-8 w-8" /></div>; }
 
     return (
-        <div className="p-4 md:p-8">
+        <>
+            <CreateCategoryModal 
+                isOpen={isCreateCategoryModalOpen}
+                onClose={() => setIsCreateCategoryModalOpen(false)}
+                onCategoryCreated={handleCategoryCreated}
+            />
+            <div className="p-4 md:p-8">
             <div className="flex items-center gap-4 mb-8">
                 <Link href={PATHROUTES.pymes.inventario}><Button variant="outline" className="px-3"><ArrowLeft className="h-5 w-5" /></Button></Link>
                 <h1 className="text-3xl font-bold text-foreground">Editar Producto</h1>
@@ -88,10 +120,33 @@ export default function EditarProductoPage({ params }: { params: { id: string } 
                             {formik.touched.name && formik.errors.name ? <div className="text-red-500 text-xs mt-1">{formik.errors.name}</div> : null}
                         </div>
                         <div>
-                            <Select id="categoryId" label="Categoría" {...formik.getFieldProps('categoryId')}>
-                                <option value="">Selecciona una categoría</option>
-                                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                            </Select>
+                            <div className="flex gap-2 items-end">
+                                <div className="flex-grow">
+                                    <Select id="categoryId" label="Categoría" {...formik.getFieldProps('categoryId')}>
+                                        <option value="">Selecciona una categoría</option>
+                                        {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                                    </Select>
+                                </div>
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={() => setIsCreateCategoryModalOpen(true)}
+                                    className="h-[49px] flex items-center gap-2 whitespace-nowrap"
+                                    title="Crear nueva categoría"
+                                >
+                                    <PlusCircle className="h-4 w-4" />
+                                    Nueva
+                                </Button>
+                            </div>
+                            {categories.length === 0 && (
+                                <div className="mt-2 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                                    <div className="flex items-center gap-2 text-primary text-sm">
+                                        <FolderOpen className="h-4 w-4" />
+                                        <span className="font-medium">¡Añade tu primera categoría!</span>
+                                    </div>
+                                    <p className="text-xs text-foreground/60 mt-1">Las categorías te ayudan a organizar mejor tu inventario.</p>
+                                </div>
+                            )}
                             {formik.touched.categoryId && formik.errors.categoryId ? <div className="text-red-500 text-xs mt-1">{formik.errors.categoryId}</div> : null}
                         </div>
                         <div><Input id="sku" label="SKU (Código único)" {...formik.getFieldProps('sku')} />{formik.touched.sku && formik.errors.sku ? <div className="text-red-500 text-xs mt-1">{formik.errors.sku}</div> : null}</div>
@@ -107,6 +162,7 @@ export default function EditarProductoPage({ params }: { params: { id: string } 
                     <div className="flex justify-end pt-4"><Button type="submit" disabled={formik.isSubmitting}>{formik.isSubmitting ? 'Guardando...' : 'Guardar Cambios'}</Button></div>
                 </form>
             </Card>
-        </div>
+            </div>
+        </>
     );
 }
