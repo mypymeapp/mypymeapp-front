@@ -40,12 +40,15 @@ export const authOptions: AuthOptions = {
             body: JSON.stringify({ name: user.name, email: user.email, avatarUrl: user.image }),
           });
           if (!res.ok) return false;
+
           const backendData = await res.json();
+          
           user.accessToken = backendData.token;
           user.id = backendData.user.id;
           user.role = backendData.user.role;
           user.company = backendData.user.company;
-          user.image = backendData.user.avatarUrl;
+          user.image = backendData.user.avatarUrl; 
+
           return true;
         } catch (error) { 
           console.error("Error en signIn de Google:", error);

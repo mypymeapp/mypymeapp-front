@@ -72,7 +72,7 @@ export const ManageCategoriesModal = ({ isOpen, onClose, categories, onUpdate }:
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${session.accessToken}` },
               });
-              if (!res.ok) throw new Error('No se pudo eliminar la categoría.');
+              if (!res.ok) throw new Error('Otro miembro creo esta categoria!');
               toast.success(`Categoría "${category.name}" eliminada.`);
               onUpdate();
             } catch (err) {
@@ -154,7 +154,7 @@ export const ManageCategoriesModal = ({ isOpen, onClose, categories, onUpdate }:
           <div className="mt-6 border-t border-border pt-4">
             <h3 className="font-semibold mb-2">Crear Nueva Categoría</h3>
             <div className="flex gap-2">
-              <Input id="new-category" label="Nombre" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} />
+              <Input id="new-category" label="Nombre de la Categoria" value={newCategoryName} onChange={(e) => setNewCategoryName(e.target.value)} />
               <Button onClick={handleCreate} disabled={!newCategoryName.trim()} className="h-[49px]">
                 <PlusCircle className="h-5 w-5" />
               </Button>

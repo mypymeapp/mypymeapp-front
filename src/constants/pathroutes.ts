@@ -2,6 +2,9 @@ export const PATHROUTES = {
   home: '/',
   login: '/login',
   register: '/register',
+  forgot_password: '/forgot-password',
+  reset_password: '/reset-password',
+  nosotros: '/nosotros',
   contacto: '/contacto',
 
   onboarding: {
@@ -12,6 +15,9 @@ export const PATHROUTES = {
     dashboard: '/pymes',
     ventas: '/pymes/ventas',
     compras: '/pymes/compras',
+    compras_nuevo: '/pymes/compras/nuevo',
+    compras_detalle: (id: string) => `/pymes/compras/${id}`,
+    compras_editar: (id: string) => `/pymes/compras/${id}/editar`,
     facturacion: '/pymes/facturacion',
     inventario: '/pymes/inventario',
     inventario_nuevo: '/pymes/inventario/nuevo',
@@ -29,6 +35,8 @@ export const PATHROUTES = {
     configuracion_perfil: '/pymes/configuracion/perfil',
     suscripcion: '/pymes/configuracion/suscripcion',
     miembros: '/pymes/configuracion/miembros',
+    miembros_nuevo: '/pymes/configuracion/miembros/nuevo',
+    miembros_editar: (id: string) => `/pymes/configuracion/miembros/${id}`,
   },
 
   superadmin: {

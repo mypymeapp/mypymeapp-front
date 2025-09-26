@@ -1,29 +1,40 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ExitoPage() {
   const { update, status } = useSession();
+  const { isPremium, isAuthenticated } = useAuth();
+  const [isUpdating, setIsUpdating] = useState(true);
 
   useEffect(() => {
-    if (status === 'authenticated') {
+
+    if (status === 'authenticated' && !isPremium) {
       update();
     }
-  }, [status, update]);
+  }, [status, isPremium, update]);
 
-  if (status === 'loading') {
+ 
+  useEffect(() => {
+    if (isAuthenticated && isPremium) {
+      setIsUpdating(false);
+    }
+  }, [isAuthenticated, isPremium]);
+
+  if (isUpdating) {
     return (
       <div className="flex flex-col items-center justify-center p-4 min-h-[calc(100vh-200px)]">
         <Loader2 className="w-20 h-20 text-primary animate-spin mx-auto mb-6" />
-        <h1 className="text-2xl font-bold text-foreground">Finalizando activación...</h1>
+        <h1 className="text-2xl font-bold text-foreground">Finalizando activación Premium...</h1>
         <p className="text-foreground/70 mt-2">
-          Estamos actualizando tu cuenta.
+          Estamos actualizando tu cuenta. Esto puede tardar unos segundos.
         </p>
       </div>
     );

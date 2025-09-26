@@ -110,9 +110,17 @@ export default function LoginPage() {
               <Input id="password" label="Contraseña" type="password" {...formik.getFieldProps('password')} />
               {formik.touched.password && formik.errors.password ? <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div> : null}
             </div>
-            <Button type="submit" disabled={formik.isSubmitting} className="w-full">
-               {formik.isSubmitting ? 'Iniciando sesión...' : 'Acceder con Email'}
-            </Button>
+            <div className="text-right mt-2">
+              <Link href={PATHROUTES.forgot_password} className="text-xs font-medium text-primary hover:underline">
+              ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
+              <Button type="submit" disabled={formik.isSubmitting} className="w-full">
+                {formik.isSubmitting 
+                  ? 'Iniciando sesión... El servidor puede tardar un momento.' 
+                  : 'Acceder con Email'
+                }
+              </Button>
           </form>
 
           <p className="text-center text-sm text-foreground/60">
