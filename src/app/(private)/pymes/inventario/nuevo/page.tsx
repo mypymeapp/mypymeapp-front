@@ -43,9 +43,9 @@ export default function NuevoProductoPage() {
     }, [session, fetchCategories]);
 
     const handleCategoryCreated = (newCategoryId: string) => {
-        
+        // Recargar las categorías
         fetchCategories();
-        
+        // Seleccionar automáticamente la nueva categoría
         formik.setFieldValue('categoryId', newCategoryId);
     };
 
