@@ -95,9 +95,12 @@ export default function RegisterPage() {
               {formik.touched.confirmPassword && formik.errors.confirmPassword ? <div className="text-red-500 text-xs mt-1">{formik.errors.confirmPassword}</div> : null}
             </div>
 
-            <Button type="submit" disabled={formik.isSubmitting} className="w-full">
-              {formik.isSubmitting ? 'Creando cuenta...' : 'Crear Cuenta'}
-            </Button>
+              <Button type="submit" disabled={formik.isSubmitting} className="w-full">
+                {formik.isSubmitting 
+                  ? 'Registrando... Por favor, espera.' 
+                  : 'Crear Cuenta'
+                }
+              </Button>
           </form>
           <p className="text-center text-sm text-foreground/60">
             ¿Ya tienes una cuenta?{' '}

@@ -58,6 +58,7 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-6">
             <div className="flex items-center gap-6 text-foreground/80 font-medium">
               <Link href={PATHROUTES.home} className="hover:text-primary transition-colors">Inicio</Link>
+              <Link href={PATHROUTES.nosotros} className="hover:text-primary transition-colors">Nosotros</Link>
               <Link href={PATHROUTES.contacto} className="hover:text-primary transition-colors">Contacto</Link>
             </div>
             <div className="flex items-center gap-4">
@@ -94,6 +95,7 @@ export const Navbar = () => {
         </button>
         <nav className="flex flex-col items-center justify-center h-full gap-8 text-2xl font-medium">
           <Link href={PATHROUTES.home} onClick={() => setIsMenuOpen(false)} className="hover:text-primary transition-colors">Inicio</Link>
+          <Link href={PATHROUTES.nosotros} onClick={() => setIsMenuOpen(false)} className="hover:text-primary transition-colors">Nosotros</Link>
           <Link href={PATHROUTES.contacto} onClick={() => setIsMenuOpen(false)} className="hover:text-primary transition-colors">Contacto</Link>
           <div className="flex flex-col items-center gap-4 mt-8 w-full px-8">
             <Link href={PATHROUTES.login} className="w-full" onClick={() => setIsMenuOpen(false)}><Button variant='outline' className="w-full">Login</Button></Link>

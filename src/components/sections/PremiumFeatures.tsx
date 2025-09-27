@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { BrainCircuit, Paintbrush, ShieldCheck } from 'lucide-react';
 import { PATHROUTES } from '@/constants/pathroutes';
 import { NeonSign } from '../ui/NeonSign';
+import  NeonBorder  from '../ui/NeonBorder';
 import Link from 'next/link';
 
 const features = [
@@ -28,62 +29,77 @@ const features = [
 ];
 
 export default function PremiumFeatures() {
+
     const [activeFeature, setActiveFeature] = useState(0);
 
     return (
-        <section className="py-20 sm:py-32">
-            <div className="container mx-auto px-6">
-                <div className="bg-card rounded-2xl p-8 md:p-16 text-center">
-                    <NeonSign
-                        as="h2"
-                        text="Disfruta de Ventajas Únicas"
-                        className="w-full max-w-5xl mx-auto"
-                        textClassName="text-[12vw] sm:text-[10vw] md:text-6xl"
-                    />
-                    <p className="mt-4 max-w-2xl mx-auto text-lg text-foreground/70">
-                        Al hacerte premium, desbloqueas herramientas diseñadas para darte una ventaja competitiva decisiva.
-                    </p>
+        <section className="py-20 sm:py-32 relative z-10">
+            <div className="container mx-auto px-4 sm:px-6">
+                <NeonBorder rx={0}>
+                    <div className="p-6 md:p-12 lg:p-16 text-center">
+                        
+                    
+                        <NeonSign
+                            as="h2"
+                            text="Disfruta de Ventajas Únicas"
+                            className="w-full max-w-5xl mx-auto"
+                            textClassName="text-4xl sm:text-5xl md:text-6xl lg:text-6xl"
+                        />
+                        
+                      
+                        <p className="mt-4 max-w-2xl mx-auto text-base sm:text-lg text-foreground/70">
+                            Al hacerte premium, desbloqueas herramientas diseñadas para darte una ventaja competitiva decisiva.
+                        </p>
 
-                    <div className="mt-16 max-w-6xl mx-auto">
-                        <div className="flex flex-col md:flex-row gap-8 md:gap-12">
-                            <div className="flex md:flex-col justify-center gap-4">
-                                {features.map((feature, index) => (
-                                    <Link
-                                        href={feature.href}
-                                        key={feature.title}
-                                        onMouseEnter={() => setActiveFeature(index)}
-                                        className={`p-4 rounded-lg text-left transition-all duration-300 w-full md:w-64 block ${
-                                            activeFeature === index
-                                                ? 'bg-primary/10 border-l-4 border-primary'
-                                                : 'hover:bg-background'
-                                        }`}
-                                    >
-                                        <h3 className="font-bold text-foreground text-lg">{feature.title}</h3>
-                                    </Link>
-                                ))}
-                            </div>
-
-                            <div className="relative w-full h-80 md:h-96 rounded-2xl p-1 bg-rgb-gradient bg-400% animate-animated-gradient">
-                                <div className="relative w-full h-full bg-background rounded-[10px] overflow-hidden">
+                        
+                        <div className="mt-12 lg:mt-16 max-w-6xl mx-auto">
+                            <div className="flex flex-col lg:flex-row gap-6 md:gap-8 lg:gap-12">
+                                
+                                
+                               <div className="flex flex-row gap-4 overflow-x-auto pb-4 lg:flex-col lg:overflow-visible lg:justify-center lg:gap-4 lg:pb-0 scrollbar-hide">
                                     {features.map((feature, index) => (
-                                        <div
+                                        <Link
+                                            href={feature.href}
                                             key={feature.title}
-                                            className={`absolute inset-0 transition-opacity duration-500 flex items-center justify-center p-8 ${
-                                                activeFeature === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                                            onMouseEnter={() => setActiveFeature(index)}
+                                            className={`p-4 text-left transition-all duration-300 min-w-[250px] lg:w-full block  ${
+                                                activeFeature === index
+                                                    ? 'bg-primary/10 border-b-4 border-primary lg:border-l-4 lg:border-b-0'
+                                                    : 'hover:bg-background/50'
                                             }`}
                                         >
-                                            <div className="text-center">
-                                                <feature.icon className="w-24 h-24 text-primary mx-auto" />
-                                                <p className="mt-8 text-xl text-foreground/80 font-medium">{feature.description}</p>
+                                            <h3 className="font-bold text-foreground text-base sm:text-lg">
+                                                {feature.title}
+                                            </h3>
+                                        </Link>
+                                    ))} 
+                                </div>
+
+                                
+                                <div className="relative w-full h-60 sm:h-80 md:h-96 lg:flex-1 border">
+                                    <div className="relative w-full h-full bg-background overflow-hidden">
+                                        {features.map((feature, index) => (
+                                            <div
+                                                key={feature.title}
+                                                className={`absolute inset-0 transition-opacity duration-500 flex items-center justify-center p-4 sm:p-6 md:p-8 ${
+                                                    activeFeature === index ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                                                }`}
+                                            >
+                                                <div className="text-center">
+                                                    <feature.icon className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-primary mx-auto" />
+                                                    <p className="mt-4 sm:mt-6 md:mt-8 text-sm sm:text-base md:text-lg text-foreground/80 font-medium">
+                                                        {feature.description}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </NeonBorder>
             </div>
         </section>
     );
-}
+    }
