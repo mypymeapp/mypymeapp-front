@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -30,7 +31,13 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { 
+    strategy: "jwt",
+    maxAge: 8 * 60 * 60, // 8 horas
+  },
+  jwt: {
+    maxAge: 8 * 60 * 60, // 8 horas
+  },
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
@@ -46,6 +53,10 @@ export const authOptions: AuthOptions = {
           user.role = backendData.user.role;
           user.company = backendData.user.company;
           user.image = backendData.user.avatarUrl;
+          // Datos de admin
+          (user as any).isAdmin = backendData.user.isAdmin || false;
+          (user as any).adminRole = backendData.user.adminRole || null;
+          (user as any).adminDepartment = backendData.user.adminDepartment || null;
           return true;
         } catch (error) { 
           console.error("Error en signIn de Google:", error);
@@ -70,6 +81,10 @@ export const authOptions: AuthOptions = {
           companyName: user.company?.name || null,
           logoUrl: user.company?.logoUrl || null,
           subscriptionStatus: user.company?.subscriptionStatus || 'FREE',
+          // Datos de admin
+          isAdmin: (user as any).isAdmin || false,
+          adminRole: (user as any).adminRole || null,
+          adminDepartment: (user as any).adminDepartment || null,
         };
       }
       return token;
@@ -84,6 +99,10 @@ export const authOptions: AuthOptions = {
       session.user.companyName = token.companyName;
       session.user.logoUrl = token.logoUrl;
       session.user.subscriptionStatus = token.subscriptionStatus;
+      // Datos de admin
+      (session.user as any).isAdmin = token.isAdmin;
+      (session.user as any).adminRole = token.adminRole;
+      (session.user as any).adminDepartment = token.adminDepartment;
       session.accessToken = token.accessToken;
       return session;
     },
