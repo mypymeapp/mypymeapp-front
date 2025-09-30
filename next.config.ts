@@ -16,6 +16,13 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Patrón para imágenes de Unsplash (avatares de prueba)
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

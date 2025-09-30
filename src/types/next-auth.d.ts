@@ -1,7 +1,8 @@
-import NextAuth, { DefaultSession } from "next-auth"
-import { JWT } from "next-auth/jwt"
+import { DefaultSession } from "next-auth"
 
 type UserRole = 'OWNER' | 'EMPLOYEE' | 'SUPERADMIN'; 
+type AdminRole = 'SUPER_ADMIN' | 'MANAGER' | 'SUPPORT';
+type AdminDepartment = 'TECNICO' | 'VENTAS' | 'FINANZAS' | 'MARKETING' | 'ADMINISTRATIVO';
 type SubscriptionStatus = 'FREE' | 'PREMIUM';
 
 declare module "next-auth" {
@@ -19,6 +20,10 @@ declare module "next-auth" {
     companyName?: string | null;
     logoUrl?: string | null; 
     subscriptionStatus?: SubscriptionStatus;
+    // Campos de admin
+    isAdmin?: boolean;
+    adminRole?: AdminRole | null;
+    adminDepartment?: AdminDepartment | null;
   }
 
   interface Session {
@@ -29,6 +34,10 @@ declare module "next-auth" {
       companyName?: string | null;
       logoUrl?: string | null; 
       subscriptionStatus?: SubscriptionStatus;
+      // Campos de admin
+      isAdmin?: boolean;
+      adminRole?: AdminRole | null;
+      adminDepartment?: AdminDepartment | null;
     } & DefaultSession["user"];
     accessToken?: string;
   }
@@ -46,5 +55,9 @@ declare module "next-auth/jwt" {
     logoUrl?: string | null;
     subscriptionStatus?: SubscriptionStatus;
     accessToken?: string;
+    // Campos de admin
+    isAdmin?: boolean;
+    adminRole?: AdminRole | null;
+    adminDepartment?: AdminDepartment | null;
   }
 }

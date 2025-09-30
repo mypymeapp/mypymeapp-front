@@ -1,10 +1,25 @@
-export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+import { AdminProvider } from "./context/admin-context";
+import SidebarSection from "./_components/sidebar/SidebarSection";
+import TopBar from "./_components/dashboard/TopBar";
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="bg-background min-h-screen">
-      <header className="bg-card border-b border-border p-4">
-        <h1 className="text-2xl font-bold text-primary">Panel de SuperAdmin</h1>
-      </header>
-      <main className="p-4 md:p-8">{children}</main>
-    </div>
+    <AdminProvider>
+      <div className="antialiased bg-background">
+        <main className="min-h-screen bg-secondary flex">
+            <SidebarSection />
+            <div className="flex-1 flex flex-col min-w-0">
+                <TopBar />
+                <section className="flex-1 p-6 overflow-auto">
+                    {children}
+                </section>
+            </div>
+        </main>
+      </div>
+    </AdminProvider>
   );
 }
