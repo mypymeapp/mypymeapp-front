@@ -199,7 +199,8 @@ export function useUserActions(): UserActions {
   }
 
   // Función para manejar creación exitosa desde componentes externos
-  const handleCreateUserSuccess = async (_newUser: User) => {
+  const handleCreateUserSuccess = async (newUser: User) => {
+    console.log('Usuario creado exitosamente:', newUser);
     try {
       await refreshUsers()
       
@@ -240,7 +241,8 @@ export function useUserActions(): UserActions {
   }
 
   // Función para manejar edición exitosa desde componentes externos
-  const handleEditUserSuccess = async (_updatedUser: User) => {
+  const handleEditUserSuccess = async (updatedUser: User) => {
+    console.log('Usuario actualizado exitosamente:', updatedUser);
     try {
       await refreshUsers()
       

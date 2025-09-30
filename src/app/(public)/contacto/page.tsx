@@ -2,7 +2,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
-import { Mail, MessageSquare, User, Building, Phone } from "lucide-react";
+// Iconos disponibles para uso futuro si se necesitan
+// import { Mail, MessageSquare, User, Building, Phone } from "lucide-react";
 
 export default function ContactoPage() {
   return (

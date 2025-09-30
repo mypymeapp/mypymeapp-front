@@ -1,5 +1,4 @@
-import NextAuth, { DefaultSession } from "next-auth"
-import { JWT } from "next-auth/jwt"
+import { DefaultSession } from "next-auth"
 
 type UserRole = 'OWNER' | 'EMPLOYEE' | 'SUPERADMIN'; 
 type AdminRole = 'SUPER_ADMIN' | 'MANAGER' | 'SUPPORT';

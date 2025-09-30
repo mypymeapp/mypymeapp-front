@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { clientService, type Client } from '@/app/(superadmin)/admin/services/clientService';
+import { clientService, type Client, type CreateClientData, type EditClientData } from '@/app/(superadmin)/admin/services/clientService';
 import toast from 'react-hot-toast';
 
 export interface ClientActions {
@@ -29,8 +29,8 @@ export interface ClientActions {
   closeDeletedModal: () => void;
   
   // Acciones CRUD
-  handleCreateClient: (clientData: any) => Promise<void>;
-  handleEditClient: (clientData: any) => Promise<void>;
+  handleCreateClient: (clientData: CreateClientData) => Promise<void>;
+  handleEditClient: (clientData: EditClientData) => Promise<void>;
   handleDeleteClient: (clientId: string) => Promise<void>;
   handleRestoreClient: (clientId: string) => Promise<void>;
   handleChangeClientStatus: (clientId: string, status: 'active' | 'inactive' | 'suspended') => Promise<void>;
@@ -105,7 +105,7 @@ export function useClientActions(): ClientActions {
   }, []);
 
   // Acciones CRUD
-  const handleCreateClient = useCallback(async (clientData: any) => {
+  const handleCreateClient = useCallback(async (clientData: CreateClientData) => {
     try {
       setIsLoading(true);
       const newClient = await clientService.createClient(clientData);
@@ -121,7 +121,7 @@ export function useClientActions(): ClientActions {
     }
   }, [refreshClients, closeCreateModal]);
 
-  const handleEditClient = useCallback(async (clientData: any) => {
+  const handleEditClient = useCallback(async (clientData: EditClientData) => {
     if (!selectedClient) return;
     
     try {
@@ -185,13 +185,15 @@ export function useClientActions(): ClientActions {
   }, [refreshClients]);
 
   // Funciones de éxito para componentes externos
-  const handleCreateClientSuccess = useCallback(async (_newClient: Client) => {
+  const handleCreateClientSuccess = useCallback(async (newClient: Client) => {
+    console.log('Cliente creado exitosamente:', newClient);
     await refreshClients();
     closeCreateModal();
     // El toast ya se maneja en el componente del formulario
   }, [refreshClients, closeCreateModal]);
 
-  const handleEditClientSuccess = useCallback(async (_updatedClient: Client) => {
+  const handleEditClientSuccess = useCallback(async (updatedClient: Client) => {
+    console.log('Cliente actualizado exitosamente:', updatedClient);
     await refreshClients();
     closeEditModal();
     // El toast ya se maneja en el componente del formulario

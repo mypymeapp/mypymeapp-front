@@ -4,15 +4,13 @@ import { useState, useEffect } from "react";
 import { 
   FiBell, 
   FiMenu,
-  FiSun,
-  FiMoon,
   FiChevronDown
 } from "react-icons/fi";
 import Image from "next/image";
 import { useAdmin } from "../../context/admin-context";
 
 export default function TopBar() {
-  const { user, theme, toggleTheme, toggleSidebar } = useAdmin();
+  const { user, toggleSidebar } = useAdmin();
   const [unreadTickets, setUnreadTickets] = useState(0);
 
 

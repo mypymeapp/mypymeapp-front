@@ -88,8 +88,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al obtener los clientes');
@@ -105,8 +105,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al crear el cliente');
@@ -122,8 +122,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al editar el cliente');
@@ -138,8 +138,8 @@ class ClientService {
       });
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al eliminar el cliente');
@@ -155,8 +155,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al obtener los clientes eliminados');
@@ -172,8 +172,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al restaurar el cliente');
@@ -189,8 +189,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al cambiar el estado del cliente');
@@ -211,8 +211,8 @@ class ClientService {
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as any;
-        const serverMessage = axiosError.response?.data?.message || axiosError.message;
+        const axiosError = error as { response?: { data?: { message?: string } }; message?: string };
+        const serverMessage = axiosError.response?.data?.message || axiosError.message || 'Error desconocido';
         throw new Error(serverMessage);
       }
       throw new Error('Error al obtener las estadísticas de clientes');
