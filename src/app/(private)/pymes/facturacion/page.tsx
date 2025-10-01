@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Plus, Trash2, AlertCircle, History, Loader2 } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, History, Loader2, ListOrdered } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 interface Customer {
@@ -202,11 +202,13 @@ export default function FacturacionPage() {
   if (loading) {
     return (
         <div className="p-8 h-full flex flex-col justify-center items-center">
-            <Loader2 className="animate-spin h-12 w-12 text-primary" />
+            {/* <Loader2 className="animate-spin h-12 w-12 text-primary" /> */}
+             <ListOrdered className="animate-spin h-12 w-12 text-primary" />
             <p className="mt-4 text-foreground/70">Cargando datos de facturación...</p>
         </div>
     );
   }
+  
 
   if (error) {
     return (

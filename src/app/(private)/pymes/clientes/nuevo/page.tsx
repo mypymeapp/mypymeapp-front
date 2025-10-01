@@ -189,7 +189,7 @@ export default function NuevoClientePage() {
                             <Input id="phone" label="Teléfono" {...formik.getFieldProps('phone')} />
                         </div>
                         <div>
-                            <Input id="notes" label="Notas" {...formik.getFieldProps('notes')} />
+                            <Input id="notes" label="Observaciones" {...formik.getFieldProps('notes')} />
                         </div>
                     </div>
                     

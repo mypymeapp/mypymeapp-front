@@ -127,7 +127,7 @@ import * as Yup from 'yup';
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, ListOrdered, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
@@ -216,7 +216,7 @@ export default function EditarClientePage() {
     if (loading) {
         return (
             <div className="p-8 h-full flex justify-center items-center">
-                <Loader2 className="animate-spin h-8 w-8 text-primary" />
+               <ListOrdered className="animate-spin h-12 w-12 text-primary" />
             </div>
         );
     }
@@ -243,7 +243,7 @@ export default function EditarClientePage() {
                             <Input id="phone" label="Teléfono" {...formik.getFieldProps('phone')} />
                         </div>
                         <div>
-                            <Input id="notes" label="Notas" {...formik.getFieldProps('notes')} />
+                            <Input id="notes" label="Observaciones" {...formik.getFieldProps('notes')} />
                         </div>
                     </div>
                     <div className="flex justify-end pt-4">
