@@ -1,12 +1,10 @@
-
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
-import { PlusCircle, Loader2, AlertTriangle, Edit, Trash2, LayoutGrid, List, Search, Users } from 'lucide-react';
+import { Phone, Mail, PlusCircle, Loader2, AlertTriangle, Edit, Trash2, LayoutGrid, List, Search, Users, ListOrdered } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -121,7 +119,7 @@ export default function ClientesPage() {
   if (loading) {
     return (
       <div className="p-8 h-full flex flex-col justify-center items-center">
-        <Loader2 className="animate-spin h-12 w-12 text-primary" />
+         <ListOrdered className="animate-spin h-12 w-12 text-primary" />
         <p className="mt-4 text-foreground/70">Cargando clientes...</p>
       </div>
     );
@@ -196,38 +194,65 @@ export default function ClientesPage() {
                 {visibleCustomers.map(customer => (
                   <div
                     key={customer.id}
-                    onClick={() => router.push(PATHROUTES.pymes.clientes_detalle(customer.id))}
-                    className="cursor-pointer"
+                    // Quitamos el onClick del div principal ya que tendremos un botón "Ver Detalles"
+                    className="cursor-pointer" 
                   >
                     <Card className="flex flex-col h-full hover:bg-muted/50 transition-colors">
-                      <div className="flex-grow p-4 text-center">
-                        <h2 className="font-bold text-lg text-foreground truncate">{customer.name}</h2>
-                        <p className="text-sm text-primary font-semibold">{customer.email || 'Sin email'}</p>
-                        <div className="my-4 text-center">
-                          <p className="text-lg font-bold text-foreground">{customer.phone || 'N/A'}</p>
-                          <p className="text-xs text-foreground/60">Teléfono</p>
-                        </div>
-                        {customer.notes && (
-                          <div className="my-2 text-center">
-                            <p className="text-sm text-foreground">{customer.notes}</p>
-                            <p className="text-xs text-foreground/60">Notas</p>
+                      
+                      {/* Contenido de la tarjeta */}
+                      <div className="flex-grow p-4 space-y-3">
+                        {/* Header con Iniciales, Nombre, y ID */}
+                        <div className="flex items-center gap-3">
+                          <div className="bg-primary/10 p-2 rounded-full flex items-center justify-center w-10 h-10 flex-shrink-0">
+                            <span className="font-bold text-primary text-xl">{customer.name.charAt(0)}</span>
                           </div>
-                        )}
+                          <div>
+                            <h2 className="font-bold text-lg text-foreground truncate">{customer.name}</h2>
+                            {/* <p className="text-xs text-foreground/60">{customer.cif || customer.dni || 'ID no disponible'}</p> */}
+                          </div>
+                        </div>
+
+                        {/* Contacto */}
+                        <div className="space-y-1 text-sm pt-3"> 
+                          <p className="flex items-center gap-2 text-foreground/80">
+                            <Mail className="w-4 h-4 text-primary/70" /> {customer.email || 'Sin email'}
+                          </p>
+                          <p className="flex items-center gap-2 text-foreground/80">
+                            <Phone className="w-4 h-4 text-primary/70" /> {customer.phone || 'Sin teléfono'}
+                          </p>
+                        </div>
+                        
                       </div>
-                      <div className="flex gap-2 mt-auto p-4 border-t border-border">
+                      {/* Fin Contenido de la tarjeta */}
+
+                      {/* Botones de acción */}
+                      {/* Se quitó 'border-t border-border' para eliminar la línea divisoria. */}
+                      <div className="flex gap-2 mt-auto p-4"> 
                         <Link
-                          href={PATHROUTES.pymes.clientes_editar(customer.id)}
-                          className="w-full"
-                          onClick={(e) => e.stopPropagation()} // ✅ evita que dispare el click del div padre
+                          href={PATHROUTES.pymes.clientes_detalle(customer.id)}
+                          className="flex-grow" // Ocupa el espacio principal
+                          onClick={(e) => e.stopPropagation()} 
                         >
                           <Button variant="outline" className="w-full">
-                            <Edit className="mr-2 h-4 w-4" /> Editar
+                            Ver Detalles
+                          </Button>
+                        </Link>
+                        {/* Se ajustó el botón Editar para que tenga texto en lugar de solo icono, y se quitó el padding extra para igualar altura */}
+                        <Link
+                          href={PATHROUTES.pymes.clientes_editar(customer.id)}
+                          className="flex-shrink-0" // Ocupa el espacio mínimo
+                          onClick={(e) => e.stopPropagation()} 
+                        >
+                          <Button variant="outline" className="px-4 h-full">
+                            Editar
                           </Button>
                         </Link>
                         <Button
                           variant="danger"
+                          // Este botón se mantiene con icono, ya que eliminar suele ser una acción de alto contraste y necesita menos espacio
+                          className="flex-shrink-0 p-2 h-auto" 
                           onClick={(e) => {
-                            e.stopPropagation(); // ✅ evita que dispare el click del div padre
+                            e.stopPropagation(); 
                             confirmDelete(customer.id);
                           }}
                         >

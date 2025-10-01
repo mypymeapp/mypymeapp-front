@@ -1,14 +1,21 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus, X, Package, DollarSign, ListOrdered } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { PATHROUTES } from "@/constants/pathroutes";
 
-// Interfaces
+// 🚨 COMPONENTES DE UI REQUERIDOS PARA EL ASPECTO IDÉNTICO
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input"; // Importado
+import { Select } from '@/components/ui/Select'; // Importado
+
+// Interfaces (Mantenidas de tu código original)
 interface Supplier {
   id: string;
   name: string;
@@ -42,15 +49,14 @@ export default function NuevaCompraPage() {
     quantity: 1,
   });
 
+  // 1. Lógica de Carga de Datos (INTACTA)
   useEffect(() => {
     async function fetchData() {
-
       if (status !== "authenticated" || !session) {
         setIsInitialLoading(false);
         return;
       }
      
-
       setIsInitialLoading(true);
       try {
         const companyId = session.user?.companyId;
@@ -94,7 +100,9 @@ export default function NuevaCompraPage() {
     fetchData();
   }, [session, status]);
 
+  // 2. Lógica de Manejo de Estado y Productos (INTACTA)
   const handleCurrentProductChange = (
+    // Esta función maneja los cambios de producto y cantidad, usa e.target.name
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
@@ -190,17 +198,21 @@ export default function NuevaCompraPage() {
     }
   };
 
+
+  // 3. Renderizado (ASPECTO IDÉNTICO AL PROVEEDOR NUEVO usando <Input> y <Select>)
+
   if (isInitialLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Cargando datos...</p>
+      <div className="p-8 h-full flex flex-col justify-center items-center">
+        <ListOrdered className="animate-spin h-12 w-12 text-primary" />
+        <p className="mt-4 text-foreground/70">Cargando datos...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="p-8 h-full flex flex-col justify-center items-center">
         <p className="text-red-500">Error: {error}</p>
       </div>
     );
@@ -208,131 +220,140 @@ export default function NuevaCompraPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex items-center mb-8">
+      {/* 🔹 HEADER */}
+      <div className="flex items-center gap-4 mb-8">
         <Link href={PATHROUTES.pymes.compras}>
-          <button className="inline-flex items-center justify-center h-9 w-9 mr-2 rounded-md hover:bg-accent">
+          <Button variant="outline" className="px-3">
             <ArrowLeft className="h-5 w-5" />
-          </button>
+          </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Nueva Compra</h1>
+        <h1 className="text-3xl font-bold text-foreground">Registrar Nueva Compra</h1>
       </div>
 
-      <div className="rounded-xl border bg-card shadow p-6 md:p-8">
-        <form onSubmit={handleSave} className="grid grid-cols-1 gap-6">
-          <div>
-            <label htmlFor="numeroFactura" className="text-sm font-medium">
-              Número de Factura
-            </label>
-            <input
-              id="numeroFactura"
-              name="numeroFactura"
-              type="text"
-              className="flex h-9 w-full rounded-md border px-3 py-1 mt-2"
-              value={numeroFactura}
-              onChange={(e) => setNumeroFactura(e.target.value)}
-              required
+      {/* 🔹 CONTENIDO EN TARJETA (CARD) */}
+      <Card isClickable={false}>
+        <form onSubmit={handleSave} className="space-y-6">
+          
+          {/* 🔹 SECCIÓN 1: DATOS DE FACTURA Y PROVEEDOR (Grid de 2 columnas) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* Número de Factura (Usando <Input>) */}
+            <Input 
+                id="numeroFactura" 
+                label="Número de Factura" 
+                value={numeroFactura} 
+                onChange={(e) => setNumeroFactura(e.target.value)} 
+                required 
             />
-          </div>
-
-          <div>
-            <label htmlFor="fechaFactura" className="text-sm font-medium">
-              Fecha de Factura
-            </label>
-            <input
-              id="fechaFactura"
-              name="fechaFactura"
-              type="date"
-              className="flex h-9 w-full rounded-md border px-3 py-1 mt-2"
-              value={fechaFactura}
-              onChange={(e) => setFechaFactura(e.target.value)}
-              required
+            
+            {/* Fecha de Factura (Usando <Input>) */}
+            <Input
+                id="fechaFactura"
+                label="Fecha de Factura"
+                type="date"
+                value={fechaFactura}
+                onChange={(e) => setFechaFactura(e.target.value)}
+                required
             />
-          </div>
 
-          <div>
-            <label htmlFor="proveedor" className="text-sm font-medium">
-              Proveedor
-            </label>
-            <select
+            {/* Proveedor (Usando <Select>) */}
+            <Select
               id="proveedor"
-              name="supplierId"
-              className="flex h-9 w-full rounded-md border px-3 py-1 mt-2"
+              label="Proveedor"
               value={selectedSupplier}
               onChange={(e) => setSelectedSupplier(e.target.value)}
               required
             >
-              <option value="" disabled>
-                Selecciona un proveedor
-              </option>
+              <option value="" disabled>Selecciona un proveedor</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
+          
+          {/* 🔹 SECCIÓN 2: PRODUCTOS A COMPRAR */}
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" /> Productos
+            </h3>
 
-          <div className="col-span-1">
-            <h3 className="text-lg font-semibold mb-2">Productos</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Panel de Agregar Producto (Grid de 3 columnas) */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-4 border border-dashed border-border rounded-lg bg-background/50">
+              
+              {/* Selector de Producto (Usando <Select>) */}
               <div className="md:col-span-2">
-                <label className="text-sm font-medium">Producto</label>
-                <select
-                  name="productId"
-                  className="flex h-9 w-full rounded-md border px-3 py-1 mt-2"
+                <Select
+                  id="currentProduct"
+                  name="productId" // ⬅️ CRÍTICO: Mantiene el 'name' para handleCurrentProductChange
+                  label="Producto"
                   value={currentProduct.productId}
-                  onChange={handleCurrentProductChange}
+                  onChange={handleCurrentProductChange} // ⬅️ LÓGICA INTACTA
                 >
-                  <option value="" disabled>
-                    Selecciona un producto
-                  </option>
-                  {products.map((p) => (
+                  <option value="" disabled>Selecciona un producto</option>
+                  {products
+                      .filter(p => !selectedProducts.some(sp => sp.productId === p.id))
+                      .map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
+              
+              {/* Campo Cantidad (Usando <Input>) */}
               <div>
-                <label className="text-sm font-medium">Cantidad</label>
-                <input
-                  name="quantity"
+                <Input
+                  id="currentQuantity"
+                  name="quantity" // ⬅️ CRÍTICO: Mantiene el 'name' para handleCurrentProductChange
+                  label="Cantidad"
                   type="number"
                   min="1"
-                  className="flex h-9 w-full rounded-md border px-3 py-1 mt-2"
-                  value={currentProduct.quantity}
-                  onChange={handleCurrentProductChange}
+                  value={currentProduct.quantity.toString()}
+                  onChange={handleCurrentProductChange} // ⬅️ LÓGICA INTACTA
                 />
               </div>
-              <div className="col-span-full flex items-end">
-                <button
+
+              {/* Botón Agregar */}
+              <div className="col-span-full flex justify-end">
+                <Button
                   type="button"
                   onClick={handleAddProduct}
-                  className="w-full bg-secondary text-secondary-foreground rounded-md h-9 px-4 py-2"
+                  variant="outline" // ✅ CORREGIDO: Cambiado de 'secondary' a 'outline'
+                  disabled={!currentProduct.productId || currentProduct.quantity <= 0}
                 >
-                  Agregar
-                </button>
+                  <Plus className="h-4 w-4 mr-2" /> Agregar
+                </Button>
               </div>
             </div>
+
+            {/* Lista de Productos Seleccionados */}
             {selectedProducts.length > 0 && (
-              <ul className="mt-4 border rounded-md p-4">
+              <ul className="mt-4 border rounded-md divide-y divide-border bg-muted/20">
                 {selectedProducts.map((p) => {
                   const details = products.find((pr) => pr.id === p.productId);
+                  const lineTotal = (details?.price ?? 0) * p.quantity;
                   return (
                     <li
                       key={p.productId}
-                      className="flex justify-between items-center py-2 border-b last:border-b-0"
+                      className="flex justify-between items-center py-3 px-4"
                     >
-                      <span>
-                        {details?.name} ({p.quantity})
+                      <span className="font-medium text-foreground">
+                        {details?.name}
                       </span>
-                      <button
+                      <span className="text-sm text-foreground/80">
+                         {p.quantity} unid. - <span className="font-semibold">${lineTotal.toFixed(2)}</span>
+                      </span>
+                      <Button
                         type="button"
+                        variant="outline" // ✅ CORREGIDO: Cambiado de 'ghost' a 'outline'
+                        // size="icon"
                         onClick={() => handleRemoveProduct(p.productId)}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:bg-red-100 h-8 w-8"
                       >
-                        Quitar
-                      </button>
+                        <X className="h-4 w-4" />
+                      </Button>
                     </li>
                   );
                 })}
@@ -340,38 +361,38 @@ export default function NuevaCompraPage() {
             )}
           </div>
 
-          <div className="col-span-full border-t pt-4 mt-6">
-            <div className="flex justify-between mb-2">
-              <p className="text-sm font-semibold">
-                Cantidad total de productos:
+          {/* 🔹 SECCIÓN 3: TOTALES Y ACCIONES */}
+          <div className="border-t pt-4 mt-6 space-y-3">
+            <div className="flex justify-between">
+              <p className="text-sm font-semibold flex items-center gap-2">
+                <ListOrdered className="h-4 w-4" /> Cantidad total de artículos:
               </p>
               <p className="font-semibold">{totalQuantity}</p>
             </div>
             <div className="flex justify-between">
-              <p className="text-lg font-bold">Total:</p>
-              <p className="text-lg font-bold">${totalPrice.toFixed(2)}</p>
+              <p className="text-lg font-bold flex items-center gap-2 text-primary">
+                <DollarSign className="h-5 w-5" /> Total Estimado:
+              </p>
+              <p className="text-2xl font-extrabold text-primary">${totalPrice.toFixed(2)}</p>
             </div>
           </div>
 
-          <div className="col-span-full flex justify-end gap-4 mt-6">
+          {/* 🔹 BOTONES FINALES */}
+          <div className="flex justify-end gap-4 pt-4">
             <Link href={PATHROUTES.pymes.compras}>
-              <button
-                type="button"
-                className="border bg-background rounded-md h-9 px-4 py-2"
-              >
+              <Button variant="outline" type="button">
                 Cancelar
-              </button>
+              </Button>
             </Link>
-            <button
+            <Button
               type="submit"
               disabled={isSubmitting || !selectedSupplier || totalQuantity === 0}
-              className="bg-primary text-primary-foreground rounded-md h-9 px-4 py-2"
             >
               {isSubmitting ? "Guardando..." : "Crear Compra"}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }
