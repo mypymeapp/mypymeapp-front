@@ -25,6 +25,7 @@ export const PATHROUTES = {
     proveedores: '/pymes/proveedores',
     proveedores_nuevo: '/pymes/proveedores/nuevo',
     proveedor_detalle: (id: string) => `/pymes/proveedores/${id}`,
+    proveedor_editar: (id: string) => `/pymes/proveedores/${id}/editar`,
     clientes: '/pymes/clientes',
     clientes_nuevo: '/pymes/clientes/nuevo',
     clientes_editar: (id: string) => `/pymes/clientes/${id}/editar`,

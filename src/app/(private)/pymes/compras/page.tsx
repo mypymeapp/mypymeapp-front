@@ -1,6 +1,6 @@
-
 "use client";
 
+import { ListOrdered } from "lucide-react"; // 👈 usa el icono que te gusta
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -13,13 +13,16 @@ import {
   LayoutGrid,
   List,
   Search,
-  Truck,
-  DollarSign,
-  Package,
+  Truck, // Usado prominentemente en la tarjeta
+  DollarSign, // Usado para el precio total
+  Package, // Usado para los productos
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { PATHROUTES } from "@/constants/pathroutes";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+
 
 // Tipos
 interface Product {
@@ -171,11 +174,6 @@ export default function ComprasPage() {
   const endIndex = startIndex + itemsPerPage;
   const visibleOrders = filteredOrders.slice(startIndex, endIndex);
 
-  // 🔹 Funciones para editar / eliminar
-  const handleEdit = (id: string) => {
-    router.push(PATHROUTES.pymes.compras_editar(id));
-  };
-
 
   const handleDelete = async (id: string) => {
     if (!session?.accessToken) {
@@ -225,14 +223,22 @@ export default function ComprasPage() {
     ));
   };
 
+  // if (isLoading) {
+  //   return (
+  //     <div className="p-8 h-full flex flex-col justify-center items-center">
+  //       <Loader2 className="animate-spin h-12 w-12 text-primary" />
+  //       <p className="mt-4 text-foreground/70">Cargando compras...</p>
+  //     </div>
+  //   );
+  // }
   if (isLoading) {
-    return (
-      <div className="p-8 h-full flex flex-col justify-center items-center">
-        <Loader2 className="animate-spin h-12 w-12 text-primary" />
-        <p className="mt-4 text-foreground/70">Cargando compras...</p>
-      </div>
-    );
-  }
+  return (
+    <div className="p-8 h-full flex flex-col justify-center items-center">
+      <ListOrdered className="animate-spin h-12 w-12 text-primary" /> {/* 👈 aquí lo cambié */}
+      <p className="mt-4 text-foreground/70">Cargando compras...</p>
+    </div>
+  );
+}
 
   if (error) {
     return (
@@ -246,6 +252,9 @@ export default function ComprasPage() {
 
   return (
     <div className="p-4 md:p-8">
+
+    
+
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-foreground">Compras</h1>
@@ -314,39 +323,67 @@ export default function ComprasPage() {
           {viewMode === "cards" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {visibleOrders.map((order) => (
-                <Card key={order.id} className="flex flex-col">
-                  <div className="p-4 flex-grow">
-                    <h2 className="font-bold text-lg text-foreground truncate">
-                      {order.supplier?.name}
-                    </h2>
-                    <p className="text-sm text-foreground/60">
-                      {new Date(order.date).toLocaleDateString()}
-                    </p>
-                    <p className="mt-2 flex items-start gap-1 text-sm">
-                      <Package className="h-4 w-4 mt-1" />{" "}
-                      {getProductDetails(order.items)}
-                    </p>
-                    <p className="mt-1 flex items-center gap-1 font-semibold">
-                      <DollarSign className="h-4 w-4" />
-                      ${calculateTotalPrice(order.items).toFixed(2)}
-                    </p>
-                  </div>
+                <Card 
+                  key={order.id} 
+                  className="flex flex-col h-full hover:shadow-lg transition-shadow"
+                  isClickable={false} // La tarjeta no es clickeable
+                >
+                  
+                  {/* Contenido principal (Visual/Informativo) */}
+                  {/* **SE ELIMINÓ EL LINK EXTERNO** */}
+                  <div className="flex-grow p-4 space-y-3"> 
+                    
+                    {/* Header con Icono y Proveedor */}
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-full flex items-center justify-center w-10 h-10 flex-shrink-0">
+                        <Truck className="h-6 w-6 text-primary" /> {/* Icono de camión prominente */}
+                      </div>
+                      <div>
+                        <h2 className="font-bold text-lg text-foreground truncate">{order.supplier?.name}</h2>
+                        <p className="text-xs text-foreground/60">
+                            Fecha: {new Date(order.date).toLocaleDateString()} {/* Fecha más pequeña abajo */}
+                        </p>
+                      </div>
+                    </div>
 
-                  {/* 🔹 Botones editar / eliminar */}
+                    {/* Información Financiera y Productos (Key Info) */}
+                    <div className="space-y-1 text-sm pt-3">
+                      {/* Precio Total Grande y Destacado */}
+                      <p className="flex items-center gap-2 font-bold text-xl text-primary">
+                        <DollarSign className="w-5 h-5 flex-shrink-0" />
+                        ${calculateTotalPrice(order.items).toFixed(2)}
+                      </p>
+                      {/* Detalles de Productos */}
+                      <p className="flex items-start gap-2 text-foreground/80 mt-2 line-clamp-2"> 
+                          <Package className="w-4 h-4 text-primary/70 flex-shrink-0 mt-1" /> 
+                          <span className="truncate">{getProductDetails(order.items)}</span>
+                      </p>
+                    </div>
+                    
+                  </div>
+                  {/* Fin Contenido de la tarjeta */}
+
+                  {/* Botones (Editar largo, Eliminar icono) - Acciones directas */}
                   <div className="flex gap-2 p-4 pt-0">
-                    <Button
-                      variant="outline"
-                      className="flex-grow"
-                      onClick={() => handleEdit(order.id)}
+                    <Link
+                      href={PATHROUTES.pymes.compras_editar(order.id)}
+                      className="flex-grow" // Ocupa todo el espacio disponible
+                      // Ya no se necesita e.stopPropagation() porque el padre (Card) no es un Link/botón.
                     >
-                      Editar
-                    </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full" // Ocupa el 100% de su contenedor (flex-grow)
+                      >
+                        Editar
+                      </Button>
+                    </Link>
                     <Button
                       variant="danger"
-                      className="flex-grow"
+                      className="flex-shrink-0 p-2 h-auto" // Botón de eliminar con icono, tamaño fijo
                       onClick={() => confirmDelete(order.id)}
+                      // Ya no se necesita e.stopPropagation() porque el padre (Card) no es un Link/botón.
                     >
-                      Eliminar
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </Card>
@@ -369,31 +406,39 @@ export default function ComprasPage() {
                     <tr
                       key={order.id}
                       className="border-b border-border last:border-b-0 hover:bg-background"
+                      // Mantenemos el onClick en la tabla para ir a detalles en la vista de lista
+                      onClick={() => router.push(PATHROUTES.pymes.compras_detalle(order.id))}
+                      role="button"
+                      tabIndex={0}
                     >
                       <td className="p-4">
                         {new Date(order.date).toLocaleDateString()}
                       </td>
-                      <td className="p-4">{order.supplier?.name}</td>
+                      <td className="p-4 font-medium text-primary">{order.supplier?.name}</td>
                       <td className="p-4">{getProductDetails(order.items)}</td>
-                      <td className="p-4">
-                        ${calculateTotalPrice(order.items).toFixed(2)}
-                      </td>
-                      {/* 🔹 Botones editar / eliminar */}
-                      <td className="p-4 text-right flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => handleEdit(order.id)}
-                          className="px-3 py-1 text-xs h-auto"
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          variant="danger"
-                          onClick={() => confirmDelete(order.id)}
-                          className="px-3 py-1 text-xs h-auto"
-                        >
-                          Eliminar
-                        </Button>
+                      <td className="p-4 font-semibold">${calculateTotalPrice(order.items).toFixed(2)}</td>
+                      {/* 🔹 Botones editar / eliminar en la vista de lista */}
+                      <td className="p-4 text-right flex gap-2 justify-end">
+                          {/* Botón Editar (outline, icono) */}
+                          <Link 
+                            href={PATHROUTES.pymes.compras_editar(order.id)} 
+                            onClick={(e) => e.stopPropagation()} // Necesario para evitar que el clic active la navegación de la fila (tr)
+                          >
+                            <Button variant="outline" className="p-2 h-auto">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          {/* Botón Eliminar (danger, icono) */}
+                          <Button
+                            variant="danger"
+                            onClick={(e) => {
+                              e.stopPropagation(); // Necesario para evitar que el clic active la navegación de la fila (tr)
+                              confirmDelete(order.id);
+                            }}
+                            className="p-2 h-auto"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                       </td>
                     </tr>
                   ))}

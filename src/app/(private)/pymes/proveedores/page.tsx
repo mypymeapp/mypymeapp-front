@@ -4,11 +4,13 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PATHROUTES } from '@/constants/pathroutes';
-import { PlusCircle, Phone, Mail, User, LayoutGrid, List, Search, Loader2, AlertTriangle, Package, DollarSign, Truck } from 'lucide-react';
+import { PlusCircle, Phone, Mail, User, LayoutGrid, List, Search, Loader2, AlertTriangle, Package, DollarSign, Truck, ListOrdered } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { useSession } from 'next-auth/react';
 import { Proveedor } from '@/mocks/types';
+import { useRouter } from 'next/navigation'; 
+
 
 type ViewMode = 'cards' | 'list';
 
@@ -20,6 +22,7 @@ export default function ProveedoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'deuda' | 'mercaderia'>('all');
   const { data: session } = useSession();
+  const router = useRouter(); 
 
   const fetchProveedores = useCallback(async () => {
       if (!session?.user?.companyId || !session?.accessToken) return;
@@ -59,51 +62,15 @@ export default function ProveedoresPage() {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [proveedores, searchTerm, filter]);
 
-  const handleDelete = async (id: string) => {
-    if (!session?.accessToken) {
-        toast.error('Sesión no válida.');
-        return;
-    }
-    try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/suppliers/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${session.accessToken}` },
-        });
-        if (!res.ok) throw new Error('No se pudo eliminar el proveedor.');
-        
-        setProveedores(prev => prev.filter(p => p.id !== id));
-        toast.success('¡Proveedor eliminado con éxito!');
-    } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Error al eliminar');
-    }
+  // const handleEdit = (id: string) => alert(`Redirigiendo a la página de edición para el proveedor ${id} (funcionalidad por implementar)`);
+ const handleEdit = (id: string) => {
+    router.push(PATHROUTES.pymes.proveedor_editar(id));
   };
-
-  const confirmDelete = (id: string) => {
-     toast((t) => (
-      <div className="flex flex-col gap-2">
-        <p>¿Seguro que quieres eliminar este proveedor?</p>
-        <div className="flex gap-2">
-          <Button variant="danger" className="px-3 py-1 text-sm h-auto" onClick={() => {
-            toast.dismiss(t.id);
-            handleDelete(id);
-          }}>
-            Sí, eliminar
-          </Button>
-          <Button variant="outline" className="px-3 py-1 text-sm h-auto" onClick={() => toast.dismiss(t.id)}>
-            Cancelar
-          </Button>
-        </div>
-      </div>
-    ));
-  };
-
-  const handleEdit = (id: string) => alert(`Redirigiendo a la página de edición para el proveedor ${id} (funcionalidad por implementar)`);
-
   const deudaActivo = filter === 'deuda';
   const mercaderiaActivo = filter === 'mercaderia';
 
   if (loading) {
-    return <div className="p-8 h-full flex justify-center items-center"><Loader2 className="animate-spin h-8 w-8 text-primary" /></div>;
+    return <div className="p-8 h-full flex justify-center items-center"> <ListOrdered className="animate-spin h-12 w-12 text-primary" /></div>;
   }
   if (error) {
     return <div className="p-8 text-center text-red-500 h-full flex flex-col justify-center items-center"><AlertTriangle className="w-12 h-12 mb-4" /><p>{error}</p></div>;
@@ -179,9 +146,10 @@ export default function ProveedoresPage() {
                 <p className="flex items-center gap-2"><Mail className="w-4 h-4 text-primary/70" /> {p.email || 'N/A'}</p>
               </div>
               <div className="flex flex-wrap gap-2 mt-auto">
+                
                  <Link href={PATHROUTES.pymes.proveedor_detalle(p.id)} className="flex-grow"><Button variant='outline' className="w-full">Ver Detalles</Button></Link>
+                 
                  <Button variant="outline" className="flex-grow sm:flex-grow-0" onClick={() => handleEdit(p.id)}>Editar</Button>
-                 <Button variant="danger" className="flex-grow sm:flex-grow-0" onClick={() => confirmDelete(p.id)}>Eliminar</Button>
               </div>
             </Card>
           ))}
@@ -209,7 +177,6 @@ export default function ProveedoresPage() {
                   <td className="p-4 text-center">{p.mercaderiaPendiente ? <span className="text-orange-400">Sí</span> : 'No'}</td>
                   <td className="p-4 text-right flex gap-2">
                     <Button variant="outline" onClick={() => handleEdit(p.id)} className="px-3 py-1 text-xs h-auto">Editar</Button>
-                    <Button variant="danger" onClick={() => confirmDelete(p.id)} className="px-3 py-1 text-xs h-auto">Eliminar</Button>
                   </td>
                 </tr>
               ))}

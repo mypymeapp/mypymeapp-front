@@ -1,12 +1,19 @@
 "use client";
 
+import { ListOrdered } from "lucide-react"; 
 import { useState, useEffect } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { useSession } from "next-auth/react";
 import { PATHROUTES } from "@/constants/pathroutes";
+
+// 🟢 UI Components
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 // Tipos
 interface Supplier {
@@ -57,7 +64,6 @@ export default function EditarCompraPage() {
         const token = session.accessToken;
         if (!companyId || !token) throw new Error("Faltan datos de sesión.");
 
-        // Cargar proveedores, productos e información de la orden
         const [supRes, prodRes, orderRes] = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_URL}/companies/${companyId}/suppliers`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -81,12 +87,10 @@ export default function EditarCompraPage() {
         setSuppliers(supData);
         setProducts(prodData);
 
-        // Prellenar datos de la orden
         setSelectedSupplier(orderData.supplierId);
         setFechaFactura(orderData.date.split("T")[0]);
         setInvoiceNumber(orderData.invoiceNumber);
 
-        // Normalizar items con información del producto
         setSelectedProducts(
           (orderData.items || []).map((item) => ({
             ...item,
@@ -144,74 +148,74 @@ export default function EditarCompraPage() {
     }
   };
 
-  const handleRemoveProduct = (productId: string) => {
-    setSelectedProducts((prev) => prev.filter((p) => p.productId !== productId));
-  };
-
   const totalQuantity = selectedProducts.reduce((s, p) => s + p.quantity, 0);
   const totalPrice = selectedProducts.reduce(
     (s, p) => s + (p.product?.price ?? 0) * p.quantity,
     0
   );
 
-  if (isLoading) return <p className="p-8">Cargando...</p>;
+  // if (isLoading)
+  //   return (
+  //     <div className="p-8 h-full flex justify-center items-center">
+  //       <Loader2 className="animate-spin h-8 w-8 text-primary" />
+  //     </div>
+  //   );
+  if (isLoading) {
+  return (
+    <div className="p-8 h-full flex flex-col justify-center items-center">
+      <ListOrdered className="animate-spin h-12 w-12 text-primary" /> {/* 👈 aquí lo cambié */}
+      <p className="mt-4 text-foreground/70">Cargando compras...</p>
+    </div>
+  );
+}
+
   if (error) return <p className="p-8 text-red-500">Error: {error}</p>;
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex items-center mb-8">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
         <Link href={PATHROUTES.pymes.compras}>
-          <button className="mr-2 h-9 w-9 flex items-center justify-center rounded-md border hover:bg-accent">
+          <Button variant="outline" className="px-3">
             <ArrowLeft className="h-5 w-5" />
-          </button>
+          </Button>
         </Link>
-        <h1 className="text-3xl font-bold">Editar Compra</h1>
+        <h1 className="text-3xl font-bold text-foreground">Editar Compra</h1>
       </div>
 
-      <div className="rounded-xl border bg-card shadow p-6">
-        <form onSubmit={handleUpdate} className="grid gap-6">
-          {/* Fecha */}
-          <div>
-            <label className="block text-sm font-medium">Fecha de factura</label>
-            <input
+      <Card isClickable={false}>
+        <form onSubmit={handleUpdate} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Input
+              id="fechaFactura"
+              label="Fecha de Factura"
               type="date"
               value={fechaFactura}
               onChange={(e) => setFechaFactura(e.target.value)}
-              className="mt-2 w-full border rounded px-3 py-2"
               required
             />
-          </div>
-
-          {/* Número de factura */}
-          <div>
-            <label className="block text-sm font-medium">Número de factura</label>
-            <input
-              type="text"
+            <Input
+              id="invoiceNumber"
+              label="Número de Factura"
               value={invoiceNumber}
               onChange={(e) => setInvoiceNumber(e.target.value)}
-              className="mt-2 w-full border rounded px-3 py-2"
               required
             />
-          </div>
 
-          {/* Proveedor */}
-          <div>
-            <label className="block text-sm font-medium">Proveedor</label>
-            <select
+            <Select
+              id="supplier"
+              label="Proveedor"
               value={selectedSupplier}
               onChange={(e) => setSelectedSupplier(e.target.value)}
-              className="mt-2 w-full border rounded px-3 py-2"
               required
             >
-              <option value="" disabled>
-                Selecciona un proveedor
-              </option>
+              <option value="">Selecciona un proveedor</option>
               {suppliers.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Productos */}
@@ -220,8 +224,10 @@ export default function EditarCompraPage() {
             {selectedProducts.length > 0 && (
               <ul className="space-y-4 mb-6">
                 {selectedProducts.map((p, index) => (
-                  <li key={p.productId + index} className="flex gap-4 items-center">
-                    <select
+                  <li key={p.productId + index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <Select
+                      id={`product-${index}`}
+                      label="Producto"
                       value={p.productId}
                       onChange={(e) => {
                         const newProducts = [...selectedProducts];
@@ -231,36 +237,31 @@ export default function EditarCompraPage() {
                         );
                         setSelectedProducts(newProducts);
                       }}
-                      className="border rounded px-2 py-1"
                     >
                       {products.map((prod) => (
                         <option key={prod.id} value={prod.id}>
                           {prod.name}
                         </option>
                       ))}
-                    </select>
-                    <input
+                    </Select>
+
+                    <Input
+                      id={`quantity-${index}`}
+                      label="Cantidad"
                       type="number"
-                      value={p.quantity}
                       min={1}
+                      value={p.quantity}
                       onChange={(e) => {
                         const newProducts = [...selectedProducts];
                         newProducts[index].quantity = Number(e.target.value);
                         setSelectedProducts(newProducts);
                       }}
-                      className="w-20 border rounded px-2 py-1"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveProduct(p.productId)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      Quitar
-                    </button>
+
                     {p.product && (
-                      <span className="ml-auto">
+                      <div className="text-right font-semibold pt-6">
                         ${(p.product.price * p.quantity).toFixed(2)}
-                      </span>
+                      </div>
                     )}
                   </li>
                 ))}
@@ -275,22 +276,13 @@ export default function EditarCompraPage() {
           </div>
 
           {/* Botones */}
-          <div className="flex justify-end gap-4">
-            <Link href={PATHROUTES.pymes.compras}>
-              <button type="button" className="px-4 py-2 border rounded">
-                Cancelar
-              </button>
-            </Link>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="px-4 py-2 bg-primary text-white rounded"
-            >
+          <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Guardando..." : "Actualizar Compra"}
-            </button>
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }
