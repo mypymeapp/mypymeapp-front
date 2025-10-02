@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { PlusCircle, Loader2, AlertTriangle, Edit, Trash2, LayoutGrid, List, Search, FolderKanban, Package, SearchX } from 'lucide-react';
+import { PlusCircle, Loader2, AlertTriangle, Edit, Trash2, LayoutGrid, List, Search, FolderKanban, Package, SearchX, ListOrdered } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
 import { Product, Category } from '@/mocks/types';
@@ -96,7 +96,7 @@ export default function InventarioPage() {
   if (loading) {
       return (
         <div className="p-8 h-full flex flex-col justify-center items-center">
-            <Loader2 className="animate-spin h-12 w-12 text-primary" />
+               <ListOrdered className="animate-spin h-12 w-12 text-primary" /> 
             <p className="mt-4 text-foreground/70">Cargando inventario...</p>
         </div>
     );

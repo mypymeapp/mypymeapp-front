@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { ArrowLeft, Loader2, PlusCircle, FolderOpen } from 'lucide-react';
+import { ArrowLeft, Loader2, PlusCircle, FolderOpen, ListOrdered } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { PATHROUTES } from '@/constants/pathroutes';
@@ -98,7 +98,18 @@ export default function EditarProductoPage({ params }: { params: { id: string } 
         },
     });
 
-    if (loading) { return <div className="p-8 flex justify-center"><Loader2 className="animate-spin h-8 w-8" /></div>; }
+     if (loading) { return <div className="p-8 h-full flex flex-col justify-center items-center">
+         <ListOrdered className="animate-spin h-12 w-12 text-primary" />
+        <p className="mt-4 text-foreground/70">Cargando producto...</p>
+      </div>
+       
+     }
+
+    // if (loading) { return <
+    //     div className="p-8 flex justify-center">
+    //     <ListOrdered className="animate-spin h-12 w-12 text-primary" />
+    //       <p className="mt-4 text-foreground/70">Cargando producto...</p>
+    //     </div>; }
 
     return (
         <>
