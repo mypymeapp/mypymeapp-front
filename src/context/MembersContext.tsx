@@ -87,8 +87,6 @@ export const MembersProvider = ({ children }: MembersProviderProps) => {
       throw new Error(errorData.message || `Error HTTP: ${response.status}`);
     }
 
-    const newMember = await response.json();
-    console.log('Miembro creado:', newMember);
   }, [session?.user.companyId, session?.accessToken]);
 
   const updateMemberRole = useCallback(async (userId: string, role: string) => {

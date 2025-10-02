@@ -15,9 +15,11 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { FcGoogle } from 'react-icons/fc';
 import { LoginRedirect } from './LoginRedirect';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -65,13 +67,10 @@ export default function LoginPage() {
 
         // Redirigir según el tipo de usuario
         if (backendData.user.isAdmin) {
-            // Si es admin, redirigir al panel de administración
             router.push('/admin');
         } else if (backendData.user.company?.name) {
-            // Si tiene empresa, redirigir al dashboard de pymes
             router.push(PATHROUTES.pymes.dashboard);
         } else {
-            // Si no tiene empresa, redirigir al onboarding
             router.push(PATHROUTES.onboarding.create_company);
         }
 
@@ -122,9 +121,24 @@ export default function LoginPage() {
               <Input id="email" label="Correo Electrónico" type="email" {...formik.getFieldProps('email')} />
               {formik.touched.email && formik.errors.email ? <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div> : null}
             </div>
-            <div>
-              <Input id="password" label="Contraseña" type="password" {...formik.getFieldProps('password')} />
-              {formik.touched.password && formik.errors.password ? <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div> : null}
+            <div className="relative">
+              <Input
+                id="password"
+                label="Contraseña"
+                type={showPassword ? 'text' : 'password'}
+                {...formik.getFieldProps('password')}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50"
+                onClick={() => setShowPassword((prev) => !prev)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+              {formik.touched.password && formik.errors.password ? (
+                <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div>
+              ) : null}
             </div>
             <div className="text-right mt-2">
               <Link href={PATHROUTES.forgot_password} className="text-xs font-medium text-primary hover:underline">

@@ -14,9 +14,8 @@ import { useRouter } from 'next/navigation';
 import { useMembers } from '@/context/MembersContext';
 
 const roles = [
-  { value: 'ADMIN', label: 'Administración' },
+  { value: 'ADMIN', label: 'Administrador' },
   { value: 'EMPLOYEE', label: 'Empleado' },
-  { value: 'OWNER', label: 'Propietario' },
 ];
 
 export default function NuevoEmpleadoPage() {
