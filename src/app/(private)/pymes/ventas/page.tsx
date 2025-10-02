@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -117,7 +116,8 @@ export default function ModuloVentas() {
   }, [fetchData]);
 
   const filteredRecords = useMemo(() => {
-    let data: SalesRecord[] = invoices;
+    // CORRECCIÓN: 'let data' cambiado a 'const data'
+    const data: SalesRecord[] = invoices;
 
     // --- FILTRADO 1: POR FECHA ---
     // Solo creamos objetos Date si las cadenas no son nulas o vacías
