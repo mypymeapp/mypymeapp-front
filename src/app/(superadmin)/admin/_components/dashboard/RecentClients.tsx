@@ -1,75 +1,33 @@
 'use client'
 
 import React from 'react'
-import { User, Calendar, MapPin } from 'lucide-react'
+import { User, Calendar, Loader2 } from 'lucide-react'
+import type { RecentClient } from '../../services/dashboardService'
 
-interface Client {
-  id: string
-  name: string
-  email: string
-  plan: string
-  joinDate: string
-  location: string
-  avatar?: string
+interface RecentClientsProps {
+  clients: RecentClient[];
+  isLoading: boolean;
 }
 
-const recentClients: Client[] = [
-  {
-    id: '1',
-    name: 'María González',
-    email: 'maria@empresa.com',
-    plan: 'Premium',
-    joinDate: '2024-01-15',
-    location: 'Buenos Aires, AR'
-  },
-  {
-    id: '2',
-    name: 'Carlos Rodríguez',
-    email: 'carlos@negocio.com',
-    plan: 'Básico',
-    joinDate: '2024-01-14',
-    location: 'Córdoba, AR'
-  },
-  {
-    id: '3',
-    name: 'Ana Martínez',
-    email: 'ana@startup.com',
-    plan: 'Premium',
-    joinDate: '2024-01-13',
-    location: 'Rosario, AR'
-  },
-  {
-    id: '4',
-    name: 'Luis Fernández',
-    email: 'luis@comercio.com',
-    plan: 'Estándar',
-    joinDate: '2024-01-12',
-    location: 'Mendoza, AR'
-  },
-  {
-    id: '5',
-    name: 'Sofia López',
-    email: 'sofia@tienda.com',
-    plan: 'Premium',
-    joinDate: '2024-01-11',
-    location: 'La Plata, AR'
+export const RecentClients: React.FC<RecentClientsProps> = ({ clients, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
   }
-]
 
-const getPlanColor = (plan: string) => {
-  switch (plan) {
-    case 'Premium':
-      return 'bg-purple-100 text-purple-800'
-    case 'Estándar':
-      return 'bg-blue-100 text-blue-800'
-    case 'Básico':
-      return 'bg-gray-100 text-gray-800'
-    default:
-      return 'bg-gray-100 text-gray-800'
+  if (!clients || clients.length === 0) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Nuevos Clientes</h3>
+        <p className="text-foreground/60 text-center py-8">No hay clientes recientes</p>
+      </div>
+    );
   }
-}
-
-export const RecentClients: React.FC = () => {
   return (
     <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
       <div className="flex items-center justify-between mb-4">
@@ -78,7 +36,7 @@ export const RecentClients: React.FC = () => {
       </div>
       
       <div className="space-y-4">
-        {recentClients.map((client) => (
+        {clients.map((client) => (
           <div key={client.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-primary/5 transition-colors">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -91,29 +49,22 @@ export const RecentClients: React.FC = () => {
                 <p className="text-sm font-medium text-foreground truncate">
                   {client.name}
                 </p>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPlanColor(client.plan)}`}>
-                  {client.plan}
-                </span>
+                {client.company && (
+                  <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                    {client.company.name}
+                  </span>
+                )}
               </div>
               
               <p className="text-sm text-foreground/60 truncate">
                 {client.email}
               </p>
               
-              <div className="flex items-center space-x-4 mt-1">
-                <div className="flex items-center space-x-1">
-                  <Calendar className="w-3 h-3 text-foreground/40" />
-                  <span className="text-xs text-foreground/60">
-                    {new Date(client.joinDate).toLocaleDateString('es-AR')}
-                  </span>
-                </div>
-                
-                <div className="flex items-center space-x-1">
-                  <MapPin className="w-3 h-3 text-foreground/40" />
-                  <span className="text-xs text-foreground/60">
-                    {client.location}
-                  </span>
-                </div>
+              <div className="flex items-center space-x-1 mt-1">
+                <Calendar className="w-3 h-3 text-foreground/40" />
+                <span className="text-xs text-foreground/60">
+                  {new Date(client.createdAt).toLocaleDateString('es-AR')}
+                </span>
               </div>
             </div>
           </div>

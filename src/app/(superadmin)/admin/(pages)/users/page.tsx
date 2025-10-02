@@ -13,7 +13,8 @@ import {
   FiUsers,
   FiUserCheck,
   FiShield,
-  FiDownload
+  FiDownload,
+  FiTrash2
 } from 'react-icons/fi';
 import CreateUserForm from './CreateUserForm';
 import EditUserForm from './EditUserForm';
@@ -31,17 +32,22 @@ export default function UsersPage() {
   // Usar el hook personalizado para todas las acciones de usuarios
   const {
     users,
+    deletedUsers,
     showCreateModal,
     setShowCreateModal,
     showEditModal,
     setShowEditModal,
     showDetailModal,
     setShowDetailModal,
+    showDeletedModal,
+    setShowDeletedModal,
     selectedUser,
     setSelectedUser,
     handleDeleteUser,
+    handleRestoreUser,
     handleCreateUserSuccess,
     handleEditUserSuccess,
+    refreshDeletedUsers,
     loading,
     stats
   } = useUserActions();
@@ -158,6 +164,15 @@ export default function UsersPage() {
 
   // Definir acciones del encabezado
   const headerActions: PageHeaderAction[] = [
+    {
+      label: `Papelera (${deletedUsers.length})`,
+      variant: 'outline',
+      onClick: () => {
+        refreshDeletedUsers();
+        setShowDeletedModal(true);
+      },
+      icon: <FiTrash2 />
+    },
     {
       label: isExporting ? 'Exportando...' : 'Exportar Datos',
       variant: 'outline',
@@ -368,6 +383,7 @@ export default function UsersPage() {
         onClose={() => setShowDetailModal(false)}
         title={selectedUser ? `Detalles de ${selectedUser.name}` : ''}
         maxWidth="3xl"
+        zIndex={60}
       >
         {selectedUser && (
           <div className="p-6 space-y-6">
@@ -496,6 +512,130 @@ export default function UsersPage() {
             onCancel={() => setShowEditModal(false)}
           />
         )}
+      </Modal>
+
+      {/* Deleted Users Modal (Papelera) */}
+      <Modal
+        isOpen={showDeletedModal}
+        onClose={() => setShowDeletedModal(false)}
+        title={`Papelera de Usuarios (${deletedUsers.length})`}
+        maxWidth="4xl"
+      >
+        <div className="p-6">
+          {deletedUsers.length === 0 ? (
+            <div className="text-center py-12">
+              <FiTrash2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
+              <h3 className="mt-4 text-lg font-medium text-foreground">La papelera está vacía</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                No hay usuarios eliminados para mostrar
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Nota:</strong> Los usuarios eliminados se pueden restaurar. Al restaurar, el usuario volverá a estar activo en el sistema.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {deletedUsers.map((user) => (
+                  <Card key={user.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          {user.avatarUrl ? (
+                            <Image 
+                              src={user.avatarUrl} 
+                              alt={user.name}
+                              width={40}
+                              height={40}
+                              className="w-10 h-10 rounded-full object-cover opacity-60"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center opacity-60">
+                              <span className="text-gray-600 dark:text-gray-300 font-medium">
+                                {user.name.charAt(0).toUpperCase()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-foreground">{user.name}</h4>
+                            {user.isAdmin && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                Admin
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          {user.deletedAt && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                              Eliminado el {new Date(user.deletedAt).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowDetailModal(true);
+                          }}
+                        >
+                          Ver Detalles
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={async () => {
+                            toast((t) => (
+                              <div className="flex flex-col gap-2 text-center">
+                                <p className="text-lg font-semibold">{`¿Restaurar el usuario "${user.name}"?`}</p>
+                                <p className="text-sm text-muted-foreground">El usuario volverá a estar activo en el sistema.</p>
+                                <div className="flex gap-2 justify-center">
+                                  <Button 
+                                    variant="primary" 
+                                    onClick={async () => {
+                                      await handleRestoreUser(user.id);
+                                      toast.dismiss(t.id);
+                                    }}
+                                  >
+                                    Sí, restaurar
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={() => toast.dismiss(t.id)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </div>
+                              </div>
+                            ), {
+                              duration: Infinity,
+                              position: 'top-center'
+                            });
+                          }}
+                        >
+                          Restaurar
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
     </motion.div>
   );

@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { FcGoogle } from 'react-icons/fc';
+import { LoginRedirect } from './LoginRedirect';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -62,9 +63,15 @@ export default function LoginPage() {
         
         toast.success('¡Bienvenido de vuelta!');
 
-        if (backendData.user.company?.name) {
+        // Redirigir según el tipo de usuario
+        if (backendData.user.isAdmin) {
+            // Si es admin, redirigir al panel de administración
+            router.push('/admin');
+        } else if (backendData.user.company?.name) {
+            // Si tiene empresa, redirigir al dashboard de pymes
             router.push(PATHROUTES.pymes.dashboard);
         } else {
+            // Si no tiene empresa, redirigir al onboarding
             router.push(PATHROUTES.onboarding.create_company);
         }
 
@@ -78,6 +85,7 @@ export default function LoginPage() {
 
   return (
     <div className="bg-background">
+      <LoginRedirect />
       <Navbar />
       <main className="flex items-center justify-center min-h-screen pt-16">
         <div className="w-full max-w-md p-8 space-y-6 bg-card border border-border rounded-2xl">
@@ -90,7 +98,15 @@ export default function LoginPage() {
             <p className="text-foreground/70">Gestiona tu negocio del futuro, hoy.</p>
           </div>
           
-          <Button variant="outline" className="w-full" onClick={() => signIn('google', { callbackUrl: PATHROUTES.pymes.dashboard })}>
+          <Button 
+            variant="outline" 
+            className="w-full" 
+            onClick={async () => {
+              // Iniciar sesión con Google
+              // La redirección se manejará en el callback de NextAuth
+              await signIn('google');
+            }}
+          >
             <FcGoogle className="mr-2 h-5 w-5" />
             Continuar con Google
           </Button>

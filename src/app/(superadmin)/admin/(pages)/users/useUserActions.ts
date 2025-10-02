@@ -199,8 +199,7 @@ export function useUserActions(): UserActions {
   }
 
   // Función para manejar creación exitosa desde componentes externos
-  const handleCreateUserSuccess = async (newUser: User) => {
-    console.log('Usuario creado exitosamente:', newUser);
+  const handleCreateUserSuccess = async (_newUser: User) => {
     try {
       await refreshUsers()
       
@@ -241,8 +240,7 @@ export function useUserActions(): UserActions {
   }
 
   // Función para manejar edición exitosa desde componentes externos
-  const handleEditUserSuccess = async (updatedUser: User) => {
-    console.log('Usuario actualizado exitosamente:', updatedUser);
+  const handleEditUserSuccess = async (_updatedUser: User) => {
     try {
       await refreshUsers()
       
@@ -258,9 +256,7 @@ export function useUserActions(): UserActions {
   // Función para eliminar usuario (soft delete)
   const handleDeleteUser = async (userId: string) => {
     try {
-      console.log('Intentando eliminar usuario:', userId)
       const response = await userService.deleteUser(userId)
-      console.log('Respuesta del servidor:', response)
       
       await refreshUsers()
       await refreshDeletedUsers()

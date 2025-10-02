@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { FiSend, FiUser, FiUserCheck } from 'react-icons/fi'
+import { FiSend, FiUser, FiUserCheck, FiRefreshCw } from 'react-icons/fi'
 
 export interface ChatMessage {
   id: string
@@ -17,6 +17,7 @@ export interface ChatMessage {
 export interface ChatHistoryProps {
   messages: ChatMessage[]
   onSendMessage: (message: string) => void
+  onRefresh?: () => void
   loading?: boolean
   className?: string
 }
@@ -24,6 +25,7 @@ export interface ChatHistoryProps {
 export const ChatHistory: React.FC<ChatHistoryProps> = ({
   messages,
   onSendMessage,
+  onRefresh,
   loading = false,
   className = ''
 }) => {
@@ -51,13 +53,27 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
     <div className={`flex flex-col h-96 border border-border rounded-lg bg-background ${className}`}>
       {/* Header */}
       <div className="p-4 border-b border-border bg-muted/30">
-        <h3 className="font-semibold text-foreground flex items-center gap-2">
-          <FiUserCheck className="w-4 h-4" />
-          Historial de Respuestas
-        </h3>
-        <p className="text-sm text-foreground/60 mt-1">
-          {messages.length} {messages.length === 1 ? 'mensaje' : 'mensajes'}
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-foreground flex items-center gap-2">
+              <FiUserCheck className="w-4 h-4" />
+              Historial de Respuestas
+            </h3>
+            <p className="text-sm text-foreground/60 mt-1">
+              {messages.length} {messages.length === 1 ? 'mensaje' : 'mensajes'}
+            </p>
+          </div>
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={loading}
+              className="p-2 hover:bg-muted rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Actualizar mensajes"
+            >
+              <FiRefreshCw className={`w-4 h-4 text-muted-foreground ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Messages Area */}
@@ -79,8 +95,8 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
               {/* Avatar */}
               <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
                 message.authorType === 'admin' 
-                  ? 'bg-blue-100 text-blue-600' 
-                  : 'bg-gray-100 text-gray-600'
+                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-200' 
+                  : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300'
               }`}>
                 {message.authorType === 'admin' ? (
                   <FiUserCheck className="w-4 h-4" />
@@ -95,7 +111,7 @@ export const ChatHistory: React.FC<ChatHistoryProps> = ({
               }`}>
                 <div className={`inline-block p-3 rounded-lg ${
                   message.authorType === 'admin'
-                    ? 'bg-primary text-button-text'
+                    ? 'bg-primary text-black'
                     : 'bg-muted border border-border text-foreground'
                 }`}>
                   <p className="text-sm whitespace-pre-wrap">{message.message}</p>

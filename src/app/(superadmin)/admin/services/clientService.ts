@@ -149,7 +149,7 @@ class ClientService {
   // Obtener clientes eliminados
   async getDeletedClients(): Promise<Client[]> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/clients/deleted`, {
+      const response = await axios.get(`${API_BASE_URL}/users/clients/deleted`, {
         headers: this.getAuthHeaders()
       });
       return response.data;
@@ -166,7 +166,7 @@ class ClientService {
   // Restaurar cliente eliminado
   async restoreClient(id: string): Promise<Client> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/clients/${id}/restore`, {}, {
+      const response = await axios.post(`${API_BASE_URL}/users/${id}/restore`, {}, {
         headers: this.getAuthHeaders()
       });
       return response.data;

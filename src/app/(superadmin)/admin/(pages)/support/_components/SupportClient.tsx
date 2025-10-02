@@ -43,12 +43,17 @@ export default function SupportClient() {
       actions.setShowEditModal(true)
     },
     onDelete: (ticket: Ticket) => {
+        if (!ticket.id) {
+            toast.error('Error: Ticket sin ID válido');
+            return;
+        }
+        
         toast((t) => (
             <div className="flex flex-col gap-2 text-center">
-                <p className="text-lg font-semibold">{`¿Estás seguro de que quieres eliminar el ticket "${ticket.id}"?`}</p>
+                <p className="text-lg font-semibold">{`¿Estás seguro de que quieres eliminar el ticket "${ticket.title}"?`}</p>
                 <div className="flex gap-2">
                     <Button variant="danger" onClick={async () => {
-                        await actions.handleDeleteTicket(ticket.id)
+                        await actions.handleDeleteTicket(ticket.id!)
                         toast.dismiss(t.id)
                     }}>Sí, eliminar</Button>
                     <Button variant="outline" onClick={() => {

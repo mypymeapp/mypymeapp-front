@@ -23,7 +23,7 @@ export function Button({
   const baseClasses = 'inline-flex items-center justify-center font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background transition-colors duration-200';
   
   const variantClasses = {
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring',
+    primary: 'bg-primary text-black dark:text-black hover:bg-primary/90 focus:ring-ring',
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 focus:ring-ring',
     danger: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-ring',
     outline: 'border border-input bg-background text-foreground hover:bg-accent hover:text-accent-foreground focus:ring-ring'

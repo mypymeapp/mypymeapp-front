@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
-import { Crown, Star, Shield } from 'lucide-react'
+import { Crown, Star, Shield, Loader2 } from 'lucide-react'
+import type { TopPlan } from '../../services/dashboardService'
+
+interface TopPlansProps {
+  plans: TopPlan[];
+  isLoading: boolean;
+}
 
 interface PlanData {
   name: string
@@ -14,29 +20,17 @@ interface PlanData {
   [key: string]: string | number | React.ReactNode
 }
 
-const plansData: PlanData[] = [
-  {
-    name: 'Premium',
-    value: 45,
-    color: '#8B5CF6',
-    icon: <Crown className="w-4 h-4" />,
-    revenue: 89500
-  },
-  {
-    name: 'Estándar',
-    value: 35,
-    color: '#3B82F6',
-    icon: <Star className="w-4 h-4" />,
-    revenue: 52500
-  },
-  {
-    name: 'Básico',
-    value: 20,
-    color: '#6B7280',
-    icon: <Shield className="w-4 h-4" />,
-    revenue: 24000
-  }
-]
+const getPlanIcon = (name: string) => {
+  if (name.includes('Premium')) return <Crown className="w-4 h-4" />;
+  if (name.includes('Gratuito')) return <Shield className="w-4 h-4" />;
+  return <Star className="w-4 h-4" />;
+};
+
+const getPlanColor = (name: string) => {
+  if (name.includes('Premium')) return '#8B5CF6';
+  if (name.includes('Gratuito')) return '#6B7280';
+  return '#3B82F6';
+};
 
 const RADIAN = Math.PI / 180
 
@@ -60,8 +54,37 @@ const renderCustomizedLabel = (props: any) => {
   )
 }
 
-export const TopPlans: React.FC = () => {
-  const totalRevenue = plansData.reduce((sum, plan) => sum + plan.revenue, 0)
+export const TopPlans: React.FC<TopPlansProps> = ({ plans, isLoading }) => {
+  const plansData: PlanData[] = useMemo(() => {
+    return plans.map(plan => ({
+      name: plan.name,
+      value: plan.subscriptionCount,
+      color: getPlanColor(plan.name),
+      icon: getPlanIcon(plan.name),
+      revenue: plan.revenue
+    }));
+  }, [plans]);
+
+  const totalRevenue = plansData.reduce((sum: number, plan: PlanData) => sum + plan.revenue, 0);
+
+  if (isLoading) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!plans || plans.length === 0) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Planes Más Vendidos</h3>
+        <p className="text-foreground/60 text-center py-8">No hay datos de planes disponibles</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">

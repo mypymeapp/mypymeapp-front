@@ -104,8 +104,6 @@ export default function CreateUserForm({ onSuccess, onCancel }: CreateUserFormPr
     setIsSubmitting(true);
 
     try {
-      console.log('Creando usuario:', formData);
-      
       // Preparar datos para el API
       const createData: CreateUserServiceData = {
         name: formData.name,
@@ -118,7 +116,6 @@ export default function CreateUserForm({ onSuccess, onCancel }: CreateUserFormPr
       
       // Llamar al servicio real para crear el usuario
       const newUser = await userService.createUser(createData);
-      console.log('Usuario creado exitosamente:', newUser);
 
       onSuccess(newUser);
     } catch (error) {

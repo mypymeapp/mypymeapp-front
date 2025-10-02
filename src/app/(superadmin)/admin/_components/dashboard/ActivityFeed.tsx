@@ -1,65 +1,47 @@
 'use client'
 
 import React from 'react'
-import { Clock, UserPlus, CreditCard, AlertCircle, CheckCircle, TrendingUp } from 'lucide-react'
+import { Clock, UserPlus, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
+import type { ActivityItem } from '../../services/dashboardService'
 
-interface Activity {
-  id: string
-  type: 'new_user' | 'payment' | 'support' | 'milestone' | 'upgrade'
-  title: string
-  description: string
-  timestamp: string
-  icon: React.ReactNode
-  color: string
+interface ActivityFeedProps {
+  activities: ActivityItem[];
+  isLoading: boolean;
 }
 
-const activities: Activity[] = [
-  {
-    id: '1',
-    type: 'new_user',
-    title: 'Nuevo cliente registrado',
-    description: 'María González se registró con plan Premium',
-    timestamp: '2024-01-15T10:30:00Z',
-    icon: <UserPlus className="w-4 h-4" />,
-    color: 'text-green-600'
-  },
-  {
-    id: '2',
-    type: 'payment',
-    title: 'Pago procesado',
-    description: 'Carlos Rodríguez renovó su suscripción mensual',
-    timestamp: '2024-01-15T09:15:00Z',
-    icon: <CreditCard className="w-4 h-4" />,
-    color: 'text-blue-600'
-  },
-  {
-    id: '3',
-    type: 'support',
-    title: 'Ticket de soporte',
-    description: 'Ana Martínez reportó un problema con la facturación',
-    timestamp: '2024-01-15T08:45:00Z',
-    icon: <AlertCircle className="w-4 h-4" />,
-    color: 'text-orange-600'
-  },
-  {
-    id: '4',
-    type: 'milestone',
-    title: 'Meta alcanzada',
-    description: 'Se alcanzaron 1000 usuarios activos este mes',
-    timestamp: '2024-01-15T07:20:00Z',
-    icon: <CheckCircle className="w-4 h-4" />,
-    color: 'text-purple-600'
-  },
-  {
-    id: '5',
-    type: 'upgrade',
-    title: 'Actualización de plan',
-    description: 'Luis Fernández actualizó de Básico a Premium',
-    timestamp: '2024-01-14T16:30:00Z',
-    icon: <TrendingUp className="w-4 h-4" />,
-    color: 'text-indigo-600'
+const getActivityIcon = (type: string) => {
+  switch (type) {
+    case 'user_created':
+      return <UserPlus className="w-4 h-4" />;
+    case 'client_created':
+      return <UserPlus className="w-4 h-4" />;
+    case 'ticket_created':
+      return <AlertCircle className="w-4 h-4" />;
+    case 'ticket_closed':
+      return <CheckCircle className="w-4 h-4" />;
+    case 'admin_action':
+      return <CheckCircle className="w-4 h-4" />;
+    default:
+      return <Clock className="w-4 h-4" />;
   }
-]
+};
+
+const getActivityColor = (type: string) => {
+  switch (type) {
+    case 'user_created':
+      return 'text-green-600';
+    case 'client_created':
+      return 'text-blue-600';
+    case 'ticket_created':
+      return 'text-orange-600';
+    case 'ticket_closed':
+      return 'text-purple-600';
+    case 'admin_action':
+      return 'text-indigo-600';
+    default:
+      return 'text-gray-600';
+  }
+};
 
 const getTimeAgo = (timestamp: string) => {
   const now = new Date()
@@ -73,34 +55,53 @@ const getTimeAgo = (timestamp: string) => {
   return `Hace ${diffInDays} días`
 }
 
-export const ActivityFeed: React.FC = () => {
+export const ActivityFeed: React.FC<ActivityFeedProps> = ({ activities, isLoading }) => {
+  if (isLoading) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!activities || activities.length === 0) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Actividad Reciente</h3>
+        <p className="text-foreground/60 text-center py-8">No hay actividad reciente</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-foreground">Actividad Reciente</h3>
-        <Clock className="w-5 h-5 text-foreground/40" />
       </div>
       
       <div className="space-y-4">
         {activities.map((activity) => (
           <div key={activity.id} className="flex items-start space-x-3">
-            <div className={`flex-shrink-0 p-2 rounded-full bg-primary/10 ${activity.color}`}>
-              {activity.icon}
+            <div className={`flex-shrink-0 ${getActivityColor(activity.type)}`}>
+              {getActivityIcon(activity.type)}
             </div>
             
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-foreground">
-                  {activity.title}
+              <p className="text-sm font-medium text-foreground truncate">
+                {activity.description}
+              </p>
+              {activity.user && (
+                <p className="text-xs text-foreground/50 truncate">
+                  {activity.user.name}
                 </p>
+              )}
+              <div className="flex items-center space-x-1 mt-1">
+                <Clock className="w-3 h-3 text-foreground/40" />
                 <span className="text-xs text-foreground/60">
                   {getTimeAgo(activity.timestamp)}
                 </span>
               </div>
-              
-              <p className="text-sm text-foreground/70 mt-1">
-                {activity.description}
-              </p>
             </div>
           </div>
         ))}

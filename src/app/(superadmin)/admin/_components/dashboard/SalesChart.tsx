@@ -1,24 +1,52 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { Loader2 } from 'lucide-react'
+import type { ChartData } from '../../services/dashboardService'
 
-const salesData = [
-  { month: 'Ene', ventas: 4000, clientes: 240 },
-  { month: 'Feb', ventas: 3000, clientes: 139 },
-  { month: 'Mar', ventas: 2000, clientes: 980 },
-  { month: 'Abr', ventas: 2780, clientes: 390 },
-  { month: 'May', ventas: 1890, clientes: 480 },
-  { month: 'Jun', ventas: 2390, clientes: 380 },
-  { month: 'Jul', ventas: 3490, clientes: 430 },
-]
+interface SalesChartProps {
+  data: ChartData | null;
+  isLoading: boolean;
+}
 
-export const SalesChart: React.FC = () => {
+interface ClientsChartProps {
+  data: ChartData | null;
+  isLoading: boolean;
+}
+
+export const SalesChart: React.FC<SalesChartProps> = ({ data, isLoading }) => {
+  const chartData = useMemo(() => {
+    if (!data) return [];
+    return data.labels.map((label, index) => ({
+      month: label,
+      ventas: data.datasets[0]?.data[index] || 0
+    }));
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || chartData.length === 0) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Ventas Mensuales</h3>
+        <p className="text-foreground/60 text-center py-12">No hay datos disponibles</p>
+      </div>
+    );
+  }
   return (
     <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
       <h3 className="text-lg font-semibold text-foreground mb-4">Ventas Mensuales</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={salesData}>
+        <LineChart data={chartData}>
           <CartesianGrid 
             strokeDasharray="3 3" 
             stroke="#6B7280"
@@ -58,12 +86,39 @@ export const SalesChart: React.FC = () => {
   )
 }
 
-export const ClientsChart: React.FC = () => {
+export const ClientsChart: React.FC<ClientsChartProps> = ({ data, isLoading }) => {
+  const chartData = useMemo(() => {
+    if (!data) return [];
+    return data.labels.map((label, index) => ({
+      month: label,
+      clientes: data.datasets[0]?.data[index] || 0
+    }));
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || chartData.length === 0) {
+    return (
+      <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
+        <h3 className="text-lg font-semibold text-foreground mb-4">Nuevos Clientes</h3>
+        <p className="text-foreground/60 text-center py-12">No hay datos disponibles</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-background p-6 rounded-lg shadow-sm border border-primary">
       <h3 className="text-lg font-semibold text-foreground mb-4">Nuevos Clientes</h3>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={salesData}>
+        <BarChart data={chartData}>
           <CartesianGrid 
             strokeDasharray="3 3" 
             stroke="#6B7280"

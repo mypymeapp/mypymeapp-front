@@ -86,9 +86,9 @@ export function useSupportActions(): SupportActions {
       const mappedTickets = response.tickets.map(ticket => ({
         ...ticket,
         client: {
-          name: ticket.user.name,
-          email: ticket.user.email,
-          company: ticket.user.name // Temporal, ya que no tenemos company en el backend
+          name: ticket.user?.name || 'Usuario desconocido',
+          email: ticket.user?.email || 'N/A',
+          company: ticket.user?.name || 'N/A' // Temporal, ya que no tenemos company en el backend
         },
         responses: ticket._count?.messages || 0,
         chatMessages: ticket.messages?.map(msg => ({
@@ -98,7 +98,7 @@ export function useSupportActions(): SupportActions {
           authorType: msg.isFromUser ? 'client' as const : 'admin' as const,
           timestamp: msg.createdAt
         })) || []
-      }))
+      }));
       
       setTickets(mappedTickets)
       setPagination(prev => ({
@@ -273,31 +273,44 @@ export function useSupportActions(): SupportActions {
 
   // Función para manejar la exportación de datos
   const handleExportData = () => {
-    // Implementar lógica de exportación
-    const csvContent = tickets.map(ticket => ({
-      ID: ticket.id,
-      Título: ticket.title,
-      Estado: supportService.mapStatusToDisplay(ticket.status),
-      Prioridad: supportService.mapPriorityToDisplay(ticket.priority),
-      Cliente: ticket.user.name,
-      'Fecha Creación': new Date(ticket.createdAt).toLocaleDateString('es-ES'),
-      Respuestas: ticket._count?.messages || 0
-    }))
+    try {
+      if (tickets.length === 0) {
+        toast.error('No hay tickets para exportar')
+        return
+      }
 
-    const csv = [
-      Object.keys(csvContent[0]).join(','),
-      ...csvContent.map(row => Object.values(row).join(','))
-    ].join('\n')
+      // Implementar lógica de exportación
+      const csvContent = tickets.map(ticket => ({
+        ID: ticket.id || 'N/A',
+        Título: ticket.title || 'Sin título',
+        Estado: ticket.status ? ticket.status.replace('_', ' ') : 'N/A',
+        Prioridad: ticket.priority || 'N/A',
+        Cliente: ticket.user?.name || 'N/A',
+        Email: ticket.user?.email || 'N/A',
+        Departamento: ticket.department || 'N/A',
+        'Admin Asignado': ticket.assignedAdmin?.name || 'Sin asignar',
+        'Fecha Creación': ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('es-ES') : 'N/A',
+        Mensajes: ticket._count?.messages || 0
+      }))
 
-    const blob = new Blob([csv], { type: 'text/csv' })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `tickets-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
-    
-    toast.success('Datos exportados correctamente')
+      const csv = [
+        Object.keys(csvContent[0]).join(','),
+        ...csvContent.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+      ].join('\n')
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `tickets-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success('Datos exportados correctamente')
+    } catch (error) {
+      console.error('Error exporting data:', error)
+      toast.error('Error al exportar los datos')
+    }
   }
 
   // Cargar datos iniciales

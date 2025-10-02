@@ -51,11 +51,32 @@ export interface TicketMessage {
   }
 }
 
+// Alias para compatibilidad
+export interface Message {
+  id: string
+  ticketId: string
+  content: string
+  isFromAdmin: boolean
+  userId?: string
+  adminId?: string
+  createdAt: string
+  readAt?: string
+  user?: {
+    id: string
+    name: string
+  }
+  admin?: {
+    id: string
+    name: string
+  }
+}
+
 export interface CreateTicketDto {
   title: string
   description: string
   priority?: 'BAJA' | 'MEDIA' | 'ALTA' | 'CRITICA'
   department?: 'TECNICO' | 'FINANCIERO' | 'ADMINISTRATIVO' | 'VENTAS'
+  userEmail?: string // Email del usuario autenticado (viene de NextAuth)
 }
 
 export interface UpdateTicketDto {
@@ -70,6 +91,7 @@ export interface UpdateTicketDto {
 export interface CreateMessageDto {
   message: string
   isFromUser?: boolean
+  userEmail?: string // Email del usuario autenticado (viene de NextAuth)
 }
 
 export interface TicketQueryDto {
@@ -81,6 +103,7 @@ export interface TicketQueryDto {
   assignedAdminId?: string
   search?: string
   sortBy?: 'createdAt' | 'updatedAt' | 'priority' | 'status'
+  userEmail?: string // Email del usuario para filtrar sus tickets
   sortOrder?: 'asc' | 'desc'
 }
 
@@ -202,6 +225,50 @@ class SupportService {
   async addUserMessage(ticketId: string, data: CreateMessageDto): Promise<TicketMessage> {
     const response = await apiClient.post(`/support/tickets/${ticketId}/messages`, data)
     return response.data
+  }
+
+  // Alias para compatibilidad con vista de clientes
+  async getMyTickets(query?: TicketQueryDto): Promise<PaginatedTickets> {
+    return this.getUserTickets(query)
+  }
+
+  async addMessage(ticketId: string, data: { content?: string; message?: string; userEmail?: string }): Promise<Message> {
+    const response = await apiClient.post(`/support/tickets/${ticketId}/messages`, {
+      message: data.message || data.content,
+      isFromUser: true,
+      userEmail: data.userEmail
+    })
+    
+    // Convertir TicketMessage a Message
+    const ticketMessage = response.data as TicketMessage
+    return {
+      id: ticketMessage.id,
+      ticketId: ticketMessage.ticketId,
+      content: ticketMessage.message,
+      isFromAdmin: !ticketMessage.isFromUser,
+      userId: ticketMessage.userId,
+      adminId: ticketMessage.adminId,
+      createdAt: ticketMessage.createdAt,
+      readAt: ticketMessage.readAt,
+      user: ticketMessage.user,
+      admin: ticketMessage.admin
+    }
+  }
+
+  // Convertir mensajes de TicketMessage a Message
+  convertMessagesToMessageFormat(messages: TicketMessage[]): Message[] {
+    return messages.map(msg => ({
+      id: msg.id,
+      ticketId: msg.ticketId,
+      content: msg.message,
+      isFromAdmin: !msg.isFromUser,
+      userId: msg.userId,
+      adminId: msg.adminId,
+      createdAt: msg.createdAt,
+      readAt: msg.readAt,
+      user: msg.user,
+      admin: msg.admin
+    }))
   }
 
   // Utilidades para mapear datos

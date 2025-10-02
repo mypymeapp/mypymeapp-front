@@ -42,8 +42,7 @@ export const menuItems: MenuItem[] = [
     id: "support",
     label: "Soporte",
     icon: <FiPhoneCall size={20} />,
-    href: "/admin/support",
-    badge: "5",
+    href: "/admin/support"
   },
 ];
 
