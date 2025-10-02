@@ -6,32 +6,39 @@ import { StatsGrid, StatCardData } from '@/app/(superadmin)/admin/_components/da
 import { PageHeader, PageHeaderAction } from '@/app/(superadmin)/admin/_components/dashboard/PageHeader';
 import { Card } from './Card';
 import { Modal } from './Modal';
+import { Button } from './Button';
 import { useClientActions } from './useClientActions';
 import { Client } from '@/app/(superadmin)/admin/services/clientService';
 import CreateClientForm from './CreateClientForm';
 import EditClientForm from './EditClientForm';
-import { FiUsers, FiUserCheck, FiUser, FiDollarSign, FiDownload } from 'react-icons/fi';
+import { FiUsers, FiUserCheck, FiUser, FiDollarSign, FiDownload, FiTrash2 } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 
 export default function ClientsPage() {
   const {
     clients,
+    deletedClients,
     isLoading,
     selectedClient,
     showViewModal,
     showCreateModal,
     showEditModal,
+    showDeletedModal,
     openCreateModal,
     closeCreateModal,
     openEditModal,
     closeEditModal,
     openViewModal,
     closeViewModal,
+    openDeletedModal,
+    closeDeletedModal,
     handleDeleteClient,
+    handleRestoreClient,
     handleCreateClientSuccess,
     handleEditClientSuccess,
-    refreshClients
+    refreshClients,
+    refreshDeletedClients
   } = useClientActions();
 
   // Estado para la exportación
@@ -142,6 +149,15 @@ export default function ClientsPage() {
 
   // Definir acciones del encabezado
   const headerActions: PageHeaderAction[] = [
+    {
+      label: `Papelera (${deletedClients.length})`,
+      variant: 'outline',
+      onClick: () => {
+        refreshDeletedClients();
+        openDeletedModal();
+      },
+      icon: <FiTrash2 />
+    },
     {
       label: isExporting ? 'Exportando...' : 'Exportar Datos',
       variant: 'outline',
@@ -335,10 +351,10 @@ export default function ClientsPage() {
             columns={columns}
             actions={actions}
             title="Lista de Clientes"
-            searchPlaceholder="Buscar por nombre, empresa o email..."
-            itemsPerPage={10}
+            searchPlaceholder="Buscar por cliente..."
+            itemsPerPage={5}
             showSearch={true}
-            showCreateButton={true}
+            showCreateButton={false}
             createButtonText="Nuevo Cliente"
             className="shadow-lg"
           />
@@ -351,6 +367,7 @@ export default function ClientsPage() {
         onClose={closeViewModal}
         title={selectedClient ? `Detalles de ${selectedClient.name}` : ''}
         maxWidth="4xl"
+        zIndex={60}
       >
         {selectedClient && selectedClient.companies?.[0] && (
           <div className="p-6 space-y-6">
@@ -506,6 +523,123 @@ export default function ClientsPage() {
             onCancel={closeEditModal}
           />
         )}
+      </Modal>
+
+      {/* Deleted Clients Modal (Papelera) */}
+      <Modal
+        isOpen={showDeletedModal}
+        onClose={closeDeletedModal}
+        title={`Papelera de Clientes (${deletedClients.length})`}
+        maxWidth="4xl"
+      >
+        <div className="p-6">
+          {deletedClients.length === 0 ? (
+            <div className="text-center py-12">
+              <FiTrash2 className="mx-auto h-12 w-12 text-muted-foreground/50" />
+              <h3 className="mt-4 text-lg font-medium text-foreground">La papelera está vacía</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                No hay clientes eliminados para mostrar
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Nota:</strong> Los clientes eliminados se pueden restaurar. Al restaurar, el cliente volverá a estar activo en el sistema.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {deletedClients.map((client) => (
+                  <Card key={client.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center opacity-60">
+                            <span className="text-gray-600 dark:text-gray-300 font-medium">
+                              {client.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-foreground">{client.name}</h4>
+                            {client.companies.length > 0 && (
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                                client.companies[0].company.subscriptionStatus === 'PREMIUM' 
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                  : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                              }`}>
+                                {client.companies[0].company.subscriptionStatus}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{client.email}</p>
+                          {client.deletedAt && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-1">
+                              Eliminado el {new Date(client.deletedAt).toLocaleDateString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            openViewModal(client);
+                          }}
+                        >
+                          Ver Detalles
+                        </Button>
+                        <Button
+                          variant="primary"
+                          onClick={() => {
+                            toast((t) => (
+                              <div className="flex flex-col gap-2 text-center">
+                                <p className="text-lg font-semibold">{`¿Restaurar el cliente "${client.name}"?`}</p>
+                                <p className="text-sm text-muted-foreground">El cliente volverá a estar activo en el sistema.</p>
+                                <div className="flex gap-2 justify-center">
+                                  <Button 
+                                    variant="primary" 
+                                    onClick={async () => {
+                                      await handleRestoreClient(client.id);
+                                      toast.dismiss(t.id);
+                                    }}
+                                  >
+                                    Sí, restaurar
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={() => toast.dismiss(t.id)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                </div>
+                              </div>
+                            ), {
+                              duration: Infinity,
+                              position: 'top-center'
+                            });
+                          }}
+                        >
+                          Restaurar
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
     </motion.div>
   );

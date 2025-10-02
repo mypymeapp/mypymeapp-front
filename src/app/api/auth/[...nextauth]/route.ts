@@ -59,6 +59,10 @@ export const authOptions: AuthOptions = {
           (user as any).isAdmin = backendData.user.isAdmin || false;
           (user as any).adminRole = backendData.user.adminRole || null;
           (user as any).adminDepartment = backendData.user.adminDepartment || null;
+          
+          // Guardar en user para usar en redirect callback
+          (user as any).shouldRedirectToAdmin = backendData.user.isAdmin;
+          
           return true;
         } catch (error) { 
           console.error("Error en signIn de Google:", error);
@@ -66,6 +70,14 @@ export const authOptions: AuthOptions = {
         }
       }
       return true;
+    },
+    async redirect({ url, baseUrl }) {
+      // Si la URL ya tiene un destino específico, usarlo
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (url.startsWith(baseUrl)) return url;
+      
+      // Por defecto, redirigir al dashboard de pymes
+      return `${baseUrl}/pymes`;
     },
     async jwt({ token, user, trigger, session }) {
       if (trigger === "update" && session) {

@@ -3,12 +3,12 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl' | '7xl';
+  zIndex?: number;
   children: React.ReactNode;
 }
 
@@ -16,7 +16,8 @@ export function Modal({
   isOpen, 
   onClose, 
   title, 
-  maxWidth = 'lg', 
+  maxWidth = 'lg',
+  zIndex = 50,
   children 
 }: ModalProps) {
   const maxWidthClasses = {
@@ -35,7 +36,7 @@ export function Modal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto" style={{ zIndex }}>
           {/* Backdrop */}
           <motion.div 
             className="fixed inset-0 bg-black bg-opacity-50"

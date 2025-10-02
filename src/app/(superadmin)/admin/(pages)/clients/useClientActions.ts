@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 export interface ClientActions {
   // Estado
   clients: Client[];
+  deletedClients: Client[];
   isLoading: boolean;
   selectedClient: Client | null;
   
@@ -16,6 +17,7 @@ export interface ClientActions {
   
   // Acciones básicas
   refreshClients: () => Promise<void>;
+  refreshDeletedClients: () => Promise<void>;
   setSelectedClient: (client: Client | null) => void;
   
   // Acciones de modales
@@ -43,6 +45,7 @@ export interface ClientActions {
 export function useClientActions(): ClientActions {
   // Estado
   const [clients, setClients] = useState<Client[]>([]);
+  const [deletedClients, setDeletedClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   
@@ -64,6 +67,18 @@ export function useClientActions(): ClientActions {
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  // Función para refrescar clientes eliminados
+  const refreshDeletedClients = useCallback(async () => {
+    try {
+      const deletedClientsData = await clientService.getDeletedClients();
+      setDeletedClients(deletedClientsData);
+    } catch (error) {
+      console.error('Error al obtener clientes eliminados:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error al obtener los clientes eliminados';
+      toast.error(errorMessage);
     }
   }, []);
 
@@ -144,7 +159,8 @@ export function useClientActions(): ClientActions {
       setIsLoading(true);
       await clientService.deleteClient(clientId);
       await refreshClients();
-      toast.success('Cliente eliminado exitosamente');
+      await refreshDeletedClients();
+      toast.success('Cliente eliminado exitosamente. Puede ser restaurado desde la papelera.');
     } catch (error) {
       console.error('Error al eliminar cliente:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar el cliente';
@@ -152,14 +168,15 @@ export function useClientActions(): ClientActions {
     } finally {
       setIsLoading(false);
     }
-  }, [refreshClients]);
+  }, [refreshClients, refreshDeletedClients]);
 
   const handleRestoreClient = useCallback(async (clientId: string) => {
     try {
       setIsLoading(true);
-      const restoredClient = await clientService.restoreClient(clientId);
+      await clientService.restoreClient(clientId);
       await refreshClients();
-      toast.success(`Cliente ${restoredClient.name} restaurado exitosamente`);
+      await refreshDeletedClients();
+      toast.success('Cliente restaurado exitosamente');
     } catch (error) {
       console.error('Error al restaurar cliente:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error al restaurar el cliente';
@@ -167,7 +184,7 @@ export function useClientActions(): ClientActions {
     } finally {
       setIsLoading(false);
     }
-  }, [refreshClients]);
+  }, [refreshClients, refreshDeletedClients]);
 
   const handleChangeClientStatus = useCallback(async (clientId: string, status: 'active' | 'inactive' | 'suspended') => {
     try {
@@ -185,15 +202,13 @@ export function useClientActions(): ClientActions {
   }, [refreshClients]);
 
   // Funciones de éxito para componentes externos
-  const handleCreateClientSuccess = useCallback(async (newClient: Client) => {
-    console.log('Cliente creado exitosamente:', newClient);
+  const handleCreateClientSuccess = useCallback(async (_newClient: Client) => {
     await refreshClients();
     closeCreateModal();
     // El toast ya se maneja en el componente del formulario
   }, [refreshClients, closeCreateModal]);
 
-  const handleEditClientSuccess = useCallback(async (updatedClient: Client) => {
-    console.log('Cliente actualizado exitosamente:', updatedClient);
+  const handleEditClientSuccess = useCallback(async (_updatedClient: Client) => {
     await refreshClients();
     closeEditModal();
     // El toast ya se maneja en el componente del formulario
@@ -202,6 +217,7 @@ export function useClientActions(): ClientActions {
   return {
     // Estado
     clients,
+    deletedClients,
     isLoading,
     selectedClient,
     
@@ -213,6 +229,7 @@ export function useClientActions(): ClientActions {
     
     // Acciones básicas
     refreshClients,
+    refreshDeletedClients,
     setSelectedClient,
     
     // Acciones de modales

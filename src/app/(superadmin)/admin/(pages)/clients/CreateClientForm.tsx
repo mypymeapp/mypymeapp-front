@@ -144,7 +144,6 @@ export function CreateClientForm({ onSuccess, onCancel }: CreateClientFormProps)
 
       // Llamar al servicio para crear el cliente
       const newClient = await clientService.createClient(createData);
-      console.log('Cliente creado exitosamente:', newClient);
       
       toast.success(`Cliente ${newClient.name} creado exitosamente`);
       onSuccess(newClient);

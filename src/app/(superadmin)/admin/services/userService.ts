@@ -145,7 +145,6 @@ export const userService = {
   // Eliminar usuario (soft delete)
   async deleteUser(id: string): Promise<SoftDeleteResponse> {
     try {
-      console.log('Eliminando usuario con ID:', id);
       const response = await apiClient.delete(`/users/${id}`);
       return response.data;
     } catch (error: unknown) {
