@@ -12,6 +12,13 @@ import { useMembers } from '@/context/MembersContext';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 
+// Mapeo de roles a español
+const ROLE_LABELS: Record<string, string> = {
+  OWNER: 'Propietario',
+  EMPLOYEE: 'Empleado',
+  ADMIN: 'Administrador',
+};
+
 export default function MiembrosPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -135,7 +142,7 @@ export default function MiembrosPage() {
                         </div>
                         <div>
                           <h2 className="font-bold text-lg text-foreground truncate max-w-[180px] sm:max-w-[220px]">{m.user.name}</h2>
-                          <p className="text-sm text-foreground/60">{m.role}</p>
+                          <p className="text-sm text-foreground/60">{ROLE_LABELS[m.role] || m.role}</p>
                         </div>
                       </div>
                     </div>
@@ -181,7 +188,7 @@ export default function MiembrosPage() {
                         </Link>
                       </td>
                       <td className="p-4">{m.user.email}</td>
-                      <td className="p-4 hidden md:table-cell">{m.role}</td>
+                      <td className="p-4 hidden md:table-cell">{ROLE_LABELS[m.role] || m.role}</td>
                       <td className="p-4 hidden lg:table-cell">
                         <span className={m.user.isActive ? 'text-green-700 font-bold' : 'text-red-700 font-bold'}>
                           {m.user.isActive ? 'Activo' : 'Inactivo'}

@@ -27,7 +27,7 @@ export default function NuevoProveedorPage() {
         const fetchCategories = async () => {
             if(!session) return;
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } });
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/categories/company/${session.user.companyId}`, { headers: { 'Authorization': `Bearer ${session.accessToken}` } });
                 if (res.ok) setCategories(await res.json());
             } catch (error) { toast.error("Error al cargar categorías"); }
         }

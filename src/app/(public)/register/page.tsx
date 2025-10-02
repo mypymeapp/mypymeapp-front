@@ -12,9 +12,13 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { useRouter } from 'next/navigation';
 import { FcGoogle } from 'react-icons/fc';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -86,12 +90,38 @@ export default function RegisterPage() {
               <Input id="email" label="Correo Electrónico" type="email" {...formik.getFieldProps('email')} />
               {formik.touched.email && formik.errors.email ? <div className="text-red-500 text-xs mt-1">{formik.errors.email}</div> : null}
             </div>
-            <div>
-              <Input id="password" label="Crea una Contraseña" type="password" {...formik.getFieldProps('password')} />
+            <div className="relative">
+              <Input
+                id="password"
+                label="Crea una Contraseña"
+                type={showPassword ? 'text' : 'password'}
+                {...formik.getFieldProps('password')}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50"
+                onClick={() => setShowPassword((prev) => !prev)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
               {formik.touched.password && formik.errors.password ? <div className="text-red-500 text-xs mt-1">{formik.errors.password}</div> : null}
             </div>
-             <div>
-              <Input id="confirmPassword" label="Confirma tu Contraseña" type="password" {...formik.getFieldProps('confirmPassword')} />
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                label="Confirma tu Contraseña"
+                type={showConfirm ? 'text' : 'password'}
+                {...formik.getFieldProps('confirmPassword')}
+              />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/50"
+                onClick={() => setShowConfirm((prev) => !prev)}
+                tabIndex={-1}
+              >
+                {showConfirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
               {formik.touched.confirmPassword && formik.errors.confirmPassword ? <div className="text-red-500 text-xs mt-1">{formik.errors.confirmPassword}</div> : null}
             </div>
 

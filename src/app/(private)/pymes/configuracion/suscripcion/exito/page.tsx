@@ -168,7 +168,7 @@ export default function ExitoPage() {
         {attempts > 0 && (
           <div className="mt-6 space-y-2">
             <p className="text-sm text-foreground/50">
-              Intento {attempts} de {maxAttempts}
+              Si no ves tu cuenta Premium en unos segundos, intenta recargar la página manualmente.
             </p>
             <div className="w-64 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div 
