@@ -72,12 +72,15 @@ const ChatInterface = () => {
   };
 
   return (
-    <Card className="h-full w-full flex flex-col">
-      <h2 className="text-xl font-bold text-foreground flex items-center gap-2 mb-4 border-b border-border pb-2">
-        <Bot className="text-primary" />
-        Asistente IA
-      </h2>
-      <div className="flex-1 overflow-y-auto pr-2 space-y-4">
+    <Card className="h-full w-full flex flex-col p-0">
+      <div className="p-4 border-b border-border">
+        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+          <Bot className="text-primary" />
+          Asistente IA
+        </h2>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, index) => (
           <div key={index} className={`flex items-start gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex flex-col gap-1 max-w-lg ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
@@ -96,7 +99,8 @@ const ChatInterface = () => {
         )}
         <div ref={messagesEndRef} />
       </div>
-      <div className="pt-4 border-t border-border">
+      
+      <div className="p-4 border-t border-border">
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <TextInput
             theme={customTextInputTheme}
@@ -118,7 +122,7 @@ const ChatInterface = () => {
 
 export default function ReportesPage() {
   return (
-    <div className="p-4 sm:p-6 lg:p-8 h-full">
+    <div className="p-4 sm:p-6 lg:p-8">
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <Cpu className="text-primary"/>
@@ -128,11 +132,11 @@ export default function ReportesPage() {
       </header>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-8">
-        <div className="lg:col-span-2 w-full h-full mb-8 lg:mb-0">
+        <div className="lg:col-span-2 w-full mb-8 lg:mb-0">
           <DashboardCharts />
         </div>
         
-        <div className="lg:col-span-1 w-full h-full">
+        <div className="lg:col-span-1 w-full h-[calc(100vh-220px)]">
           <ChatInterface />
         </div>
       </div>
